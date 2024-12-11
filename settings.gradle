@@ -1,0 +1,3 @@
+rootProject.name = 'SNAPLINK-URL-SHORTEN-SERVICE'
+include 'bigtableDB'
+include 'snaplink'
