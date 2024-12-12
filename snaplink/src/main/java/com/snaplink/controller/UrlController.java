@@ -5,9 +5,16 @@ import org.example.IpPraser;
 import org.example.UrlShortener;
 
 import com.google.cloud.bigtable.data.v2.BigtableDataClient;
+import org.springframework.http.HttpStatus;
+
+import com.snaplink.dto.BulkShortenUrlRequest;
+import com.snaplink.dto.BulkShortenUrlResponse;
+import com.snaplink.dto.CustomShortenUrlRequest;
 import com.snaplink.dto.ShortenUrlRequest;
 import com.snaplink.dto.ShortenUrlResponse;
 import com.snaplink.dto.UrlAnalyticsResponse;
+import com.snaplink.dto.UserLinksResponse;
+import com.snaplink.dto.LinkMetricsResponse;
 import com.snaplink.service.UrlService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +30,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin(origins = "http://localhost:3000")  
 public class UrlController {
     private final UrlShortener urlShortener;
     private final IpPraser ipPraser;
@@ -55,7 +63,7 @@ public class UrlController {
     }
 
     @GetMapping("/url/{shortUrl}")
-    public String getOriginalUrl(
+    public RedirectView getOriginalUrl(
             @PathVariable String shortUrl,
             @RequestHeader(value = "X-Forwarded-For", required = false) String ipAddress
     ) throws Exception {
@@ -65,7 +73,7 @@ public class UrlController {
         String formattedDate = currentDate.format(formatter);
 
         urlShortener.updateAnalytics(shortUrl, formattedDate, ipPraser.resolveGeolocation(ipAddress));
-        return urlShortener.getOriginalUrl(shortUrl);
+        return new RedirectView(urlShortener.getOriginalUrl(shortUrl));
     }
     @GetMapping("/{shortUrl}")
     public RedirectView redirectToOriginalUrl(
@@ -128,97 +136,70 @@ public class UrlController {
 
         return response;
     }
-}
 
-// Request class
-class UrlRequest {
-    private String userId;
-    private String longUrl;
+    @PostMapping("/bulk-shorten")
+    public ResponseEntity<BulkShortenUrlResponse> bulkShortenUrl(
+            @RequestBody BulkShortenUrlRequest request,
+            @RequestHeader(value = "X-Forwarded-For", required = false) String forwardedFor,
+            @RequestHeader(value = "User-Agent", required = false) String userAgent) {
+        
+        String ipAddress = forwardedFor != null ? forwardedFor.split(",")[0] : "unknown";
+        BulkShortenUrlResponse response = urlService.createBulkShortUrls(
+            request.getUserId(),
+            request.getLongUrls(),
+            ipAddress,
+            userAgent
+        );
 
-    // Getters and setters
-    public String getUserId() { return userId; }
-    public void setUserId(String userId) { this.userId = userId; }
-    public String getLongUrl() { return longUrl; }
-    public void setLongUrl(String longUrl) { this.longUrl = longUrl; }
-}
-
-class LinkMetricsResponse {
-
-    private String link;
-    private ArrayList<Metric> metrics;
-
-    // Getters and Setters
-    public String getLink() {
-        return link;
+        return ResponseEntity.ok(response);
     }
 
-    public void setLink(String link) {
-        this.link = link;
-    }
-
-    public ArrayList<Metric> getMetrics() {
-        return metrics;
-    }
-
-    public void setMetrics(ArrayList<Metric> metrics) {
-        this.metrics = metrics;
-    }
-
-    public static class Metric {
-        private String date;
-        private int click;
-        private ArrayList<Country> country;
-
-        // Getters and Setters
-        public String getDate() {
-            return date;
-        }
-
-        public void setDate(String date) {
-            this.date = date;
-        }
-
-        public int getClick() {
-            return click;
-        }
-
-        public void setClick(int click) {
-            this.click = click;
-        }
-
-        public ArrayList<Country> getCountry() {
-            return country;
-        }
-
-        public void setCountry(ArrayList<Country> country) {
-            this.country = country;
-        }
-    }
-
-    public static class Country {
-        private String name;
-        private int click; // Fix the typo if needed to "click"
-
-        public Country(String name, int click) {
-            this.name = name;
-            this.click = click;
-        }
-
-        // Getters and Setters
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public int getClick() { // Fix the typo if needed to "getClick"
-            return click;
-        }
-
-        public void setClick(int click) { // Fix the typo if needed to "setClick"
-            this.click = click;
-        }
+    @GetMapping("/users/{userId}/links")
+    public ResponseEntity<UserLinksResponse> getUserLinks(
+        @PathVariable String userId) {
+    try {
+        UserLinksResponse response = urlService.getUserLinks(userId);
+        return ResponseEntity.ok(response);
+    } catch (Exception e) {
+        // You might want to add proper error handling here
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 }
+@PostMapping("/custom-shorten")
+public ResponseEntity<?> createCustomShortUrl(
+        @RequestBody CustomShortenUrlRequest request,
+        @RequestHeader(value = "X-Forwarded-For", required = false) String forwardedFor,
+        @RequestHeader(value = "User-Agent", required = false) String userAgent) {
+    
+    try {
+        String ipAddress = forwardedFor != null ? forwardedFor.split(",")[0] : "unknown";
+        
+        // Additional validation if needed
+        if (request.getCustomName() == null || request.getCustomName().trim().isEmpty()) {
+            return ResponseEntity
+                .badRequest()
+                .body("Custom name cannot be empty");
+        }
+        
+        String shortUrl = urlService.createCustomShortUrl(
+            request.getUserId(),
+            request.getLongUrl(),
+            request.getCustomName(),
+            ipAddress,
+            userAgent
+        );
+
+        return ResponseEntity.ok(new ShortenUrlResponse(shortUrl));
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity
+            .badRequest()
+            .body(e.getMessage());
+    } catch (Exception e) {
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Failed to create custom short URL");
+    }
+}
+}
+
+

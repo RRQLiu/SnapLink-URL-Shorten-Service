@@ -2,6 +2,8 @@ package org.example;
 
 import com.google.cloud.bigtable.data.v2.BigtableDataClient;
 import com.google.cloud.bigtable.data.v2.models.RowMutation;
+import com.google.cloud.bigtable.data.v2.models.TableId;
+import com.google.protobuf.ByteString;
 import com.google.cloud.bigtable.data.v2.models.Row;
 import com.google.cloud.bigtable.data.v2.models.RowCell;
 import java.io.IOException;
@@ -10,6 +12,12 @@ import java.util.Base64;
 import com.google.cloud.bigtable.data.v2.models.Query;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Map;  // This should be java.util.Map, not some other Map class
+import java.util.List;
+import java.util.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.google.cloud.bigtable.data.v2.models.Filters;
@@ -184,6 +192,116 @@ public class UrlShortener {
 
         return rowsData;
     }
+
+    public List<Map<String, String>> getUserLinks(String userId) throws IOException {
+        Query userQuery = Query.create(BigtableConnector.LINK_TABLE_ID)
+            .filter(Filters.FILTERS.chain()
+                .filter(Filters.FILTERS.family().exactMatch(LINK_COLUMN_FAMILY))
+                .filter(Filters.FILTERS.qualifier().exactMatch(USER_ID_COLUMN))
+                .filter(Filters.FILTERS.value().exactMatch(ByteString.copyFromUtf8(userId))));
+    
+        List<Map<String, String>> links = new ArrayList<>();
+        
+        for (Row row : dataClient.readRows(userQuery)) {
+            String shortUrl = row.getKey().toStringUtf8();
+            Map<String, String> linkData = new HashMap<>();
+            linkData.put("shortUrl", shortUrl);
+            
+            // Get the full row data
+            Row fullRow = dataClient.readRow(BigtableConnector.LINK_TABLE_ID, shortUrl);
+            System.out.println("Reading full row data for shortUrl: " + shortUrl);
+            
+            // Debug print all cells
+            for (RowCell cell : fullRow.getCells(LINK_COLUMN_FAMILY)) {
+                String qualifier = cell.getQualifier().toStringUtf8();
+                String value = cell.getValue().toStringUtf8();
+                System.out.println("Column: " + qualifier + ", Value: " + value);
+            }
+    
+            // Get long URL
+            String longUrl = getOriginalUrl(shortUrl);
+            linkData.put(LONG_URL_COLUMN, longUrl);
+    
+            // Get creation date directly
+            List<RowCell> dateCell = fullRow.getCells(LINK_COLUMN_FAMILY, CREATION_DATE_COLUMN);
+            if (!dateCell.isEmpty()) {
+
+                // In getUserLinks method
+            String creationDate = dateCell.get(0).getValue().toStringUtf8();
+            linkData.put(getCreationDateKey(), creationDate);  // Use the getter method's key
+
+            } else {
+                System.out.println("No creation date found for: " + shortUrl);
+            }
+    
+            // Get status
+            List<RowCell> statusCell = fullRow.getCells(LINK_COLUMN_FAMILY, STATUS_COLUMN);
+            if (!statusCell.isEmpty()) {
+                String status = statusCell.get(0).getValue().toStringUtf8();
+                linkData.put("active", status);
+            }
+    
+            // Get analytics data
+            String today = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
+            Row analyticsRow = getAnalytics(shortUrl, today);
+            if (analyticsRow != null) {
+                List<String> cells = analyticsRow.getCells("metrics", "total_clicks")
+                    .stream()
+                    .map(cell -> cell.getValue().toStringUtf8())
+                    .toList();
+                if (!cells.isEmpty()) {
+                    linkData.put("totalClicks", cells.get(0));
+                }
+            }
+            
+            links.add(linkData);
+        }
+        
+        return links;
+    }
+
+
+    public String createCustomUrl(String userId, String longUrl, String customName, String creationDate) throws IOException {
+        // Validate custom name length
+        if (customName.length() > 7) {
+            throw new IllegalArgumentException("Custom name cannot be longer than 7 characters");
+        }
+        
+        // Validate custom name format (alphanumeric only)
+        if (!customName.matches("^[a-zA-Z0-9]*$")) {
+            throw new IllegalArgumentException("Custom name must contain only letters and numbers");
+        }
+        
+        // Check if custom name is already taken
+        Row existingRow = dataClient.readRow(BigtableConnector.LINK_TABLE_ID, customName);
+        if (existingRow != null) {
+            throw new IllegalArgumentException("This custom name is already taken");
+        }
+        
+        // Create the custom URL entry
+        RowMutation rowMutation = RowMutation.create(BigtableConnector.LINK_TABLE_ID, customName)
+                .setCell(LINK_COLUMN_FAMILY, LONG_URL_COLUMN, longUrl)
+                .setCell(LINK_COLUMN_FAMILY, USER_ID_COLUMN, userId)
+                .setCell(LINK_COLUMN_FAMILY, CREATION_DATE_COLUMN, creationDate)
+                .setCell(LINK_COLUMN_FAMILY, STATUS_COLUMN, "true")
+                .setCell(LINK_COLUMN_FAMILY, "is_custom", "true");
+        
+        dataClient.mutateRow(rowMutation);
+        return customName;
+    }
+public  static String getLongUrlKey() {
+    return LONG_URL_COLUMN;
+}
+
+
+
+public static String getCreationDateKey() {
+    return CREATION_DATE_COLUMN;
+}
+
+public static String getStatusKey() {
+    return STATUS_COLUMN;
+}  
 
 
 }
