@@ -2,6 +2,7 @@ package org.example;
 
 import com.google.cloud.bigtable.data.v2.BigtableDataClient;
 import com.google.cloud.bigtable.data.v2.BigtableDataSettings;
+import com.google.cloud.bigtable.data.v2.models.TableId;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import java.io.FileInputStream;
 import java.io.File;
@@ -29,5 +30,9 @@ public class BigtableConnector {
                     ServiceAccountCredentials.fromStream(new FileInputStream(keyPath)))
                 .build();
         return BigtableDataClient.create(settings);
+    }
+    public static String getTablePath(String tableId) {
+        return String.format("projects/%s/instances/%s/tables/%s", 
+            PROJECT_ID, INSTANCE_ID, tableId);
     }
 }
