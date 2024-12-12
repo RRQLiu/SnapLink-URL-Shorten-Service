@@ -33,7 +33,12 @@
     "retrieve": "Recuperar",
     "result": "URL Corta",
     "urlRequired": "Por favor ingrese una URL",
-    "retrieveUrlRequired": "Por favor ingrese una URL corta"
+    "retrieveUrlRequired": "Por favor ingrese una URL corta",
+    "bulkSection": "Operación en Masa",
+    "bulkUrls": "Ingrese URLs (una por línea)",
+    "bulkResult": "URLs Cortas",
+    "bulkUrlsHelper": "Ingrese URLs (una por línea)",
+    "shortUrl": "URL Corta"
   },
   "myLinks": {
     "title": "Mis Enlaces",
@@ -62,4 +67,4 @@
     "member3Description": "Diseñador UI/UX apasionado por la experiencia del usuario.",
     "member4Description": "Gerente de proyecto con amplia experiencia en desarrollo de software."
   }
-} 
+}

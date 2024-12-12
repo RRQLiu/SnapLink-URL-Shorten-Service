@@ -22,12 +22,14 @@ function App() {
     // In real implementation, this would make an API call
     setIsAuthenticated(true);
     localStorage.setItem("mockToken", "test-token-123");
+    localStorage.setItem("userID", "123@123.com");
     return true;
   };
 
   const logout = () => {
     setIsAuthenticated(false);
     localStorage.removeItem("mockToken");
+    localStorage.removeItem("userID");
   };
 
   return (

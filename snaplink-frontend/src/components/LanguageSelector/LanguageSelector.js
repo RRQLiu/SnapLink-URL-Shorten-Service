@@ -1,6 +1,6 @@
-import React from 'react';
-import { Select, MenuItem } from '@mui/material';
-import { useTranslation } from 'react-i18next';
+import React from "react";
+import { Select, MenuItem } from "@mui/material";
+import { useTranslation } from "react-i18next";
 
 const LanguageSelector = () => {
   const { i18n } = useTranslation();
@@ -13,18 +13,19 @@ const LanguageSelector = () => {
     <Select
       value={i18n.language}
       onChange={changeLanguage}
-      sx={{ 
-        position: 'absolute', 
-        top: '0.2rem', 
-        right: '8rem',
-        color: 'black'
+      sx={{
+        position: "absolute",
+        top: "0.2rem",
+        right: "8rem",
+        color: "black",
       }}
     >
       <MenuItem value="en">English</MenuItem>
       <MenuItem value="es">Español</MenuItem>
       <MenuItem value="zh">中文</MenuItem>
+      <MenuItem value="ru">русский язык</MenuItem>
     </Select>
   );
 };
 
-export default LanguageSelector; 
+export default LanguageSelector;

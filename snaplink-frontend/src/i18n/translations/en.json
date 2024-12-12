@@ -33,6 +33,21 @@
     "retrieve": "Retrieve",
     "result": "Short URL",
     "urlRequired": "Please enter a URL",
-    "retrieveUrlRequired": "Please enter a short URL"
+    "retrieveUrlRequired": "Please enter a short URL",
+    "bulkSection": "Bulk Operation",
+    "bulkUrls": "Enter URLs (one per line)",
+    "bulkResult": "Short URLs",
+    "bulkUrlsHelper": "Enter URLs (one per line)",
+    "shortUrl": "Short URL"
+  },
+  "about": {
+    "title": "About Us",
+    "missionTitle": "Our Mission",
+    "missionText": "At SnapLink, our mission is simple: to reshape the way you share and experience links online. With our intuitive platform, we transform unwieldy URLs into sleek, trackable shortcuts that effortlessly connect you to the content that matters most. By creating a better vision of links in the digital age, we help individuals, businesses, and organizations streamline their online presence, grow their audiences, and navigate the web with ease.",
+    "teamTitle": "Meet the Team",
+    "member1Description": "Frontend developer, skilled in React and UI design.",
+    "member2Description": "Backend developer, focused on system architecture.",
+    "member3Description": "UI/UX designer, dedicated to improving user experience.",
+    "member4Description": "Project manager, with extensive software development experience."
   }
-} 
+}

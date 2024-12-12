@@ -33,7 +33,12 @@
     "retrieve": "获取",
     "result": "短链接",
     "urlRequired": "请输入网址",
-    "retrieveUrlRequired": "请输入短链接"
+    "retrieveUrlRequired": "请输入短链接",
+    "bulkSection": "批量操作",
+    "bulkUrls": "输入网址（一行一个）",
+    "bulkResult": "短链接",
+    "bulkUrlsHelper": "输入网址（一行一个）",
+    "shortUrl": "短链接"
   },
   "myLinks": {
     "title": "我的链接",
@@ -62,4 +67,4 @@
     "member3Description": "UI/UX设计师，致力于提升用户体验。",
     "member4Description": "项目经理，拥有丰富的软件开发经验。"
   }
-} 
+}

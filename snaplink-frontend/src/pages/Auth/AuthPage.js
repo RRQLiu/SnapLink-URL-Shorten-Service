@@ -28,11 +28,14 @@ const AuthPage = ({ onLogin }) => {
       if (mode === 'login') {
         // Mock successful login
         const success = onLogin(email, password);
-        if (success) navigate('/main');
+        if (success) {
+          localStorage.setItem("userID", email);
+          navigate('/main');}
       } else {
         // Mock registration
         // In real implementation, this would call the API
         onLogin(email, password);
+        localStorage.setItem("userID", email);
         navigate('/main');
       }
     } catch (err) {

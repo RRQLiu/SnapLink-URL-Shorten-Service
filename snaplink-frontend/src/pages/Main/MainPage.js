@@ -10,6 +10,7 @@ import {
   Alert 
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import axios from 'axios';
 
 const MainPage = () => {
   const { t } = useTranslation();
@@ -19,30 +20,83 @@ const MainPage = () => {
   const [retrieveUrl, setRetrieveUrl] = useState('');
   const [retrievedOriginalUrl, setRetrievedOriginalUrl] = useState('');
   const [error, setError] = useState('');
+  const [bulkUrls, setBulkUrls] = useState('');
+  const [bulkResults, setBulkResults] = useState(null);
 
-  // Mock function to generate short URL
-  const handleGenerate = () => {
+  const getUserId = () => {
+    console.log(localStorage.getItem('userID'));
+    return localStorage.getItem('userID') || '';
+  };
+
+  const handleGenerate = async () => {
     setError('');
+    const userId = getUserId();
+    
+    if (!userId) {
+      setError(t('main.loginRequired'));
+      return;
+    }
+    
     if (!originalUrl) {
       setError(t('main.urlRequired'));
       return;
     }
     
-    // Mock response
-    const mockShortUrl = `http://snaplink.ly/${customName || Math.random().toString(36).substr(2, 6)}`;
-    setShortUrl(mockShortUrl);
+    try {
+      const response = await axios.post('/api/shorten', {
+        userId,
+        longUrl: originalUrl
+      });
+      setShortUrl(response.data.shortUrl);
+    } catch (err) {
+      setError(err.response?.data?.message || t('main.generalError'));
+    }
   };
 
-  // Mock function to retrieve original URL
-  const handleRetrieve = () => {
+  const handleRetrieve = async () => {
     setError('');
     if (!retrieveUrl) {
       setError(t('main.retrieveUrlRequired'));
       return;
     }
 
-    // Mock response
-    setRetrievedOriginalUrl('https://www.example.com/very/long/original/url');
+    try {
+      const response = await axios.get(`/api/url/${retrieveUrl}`);
+      setRetrievedOriginalUrl(response.headers.location);
+    } catch (err) {
+      setError(err.response?.data?.message || t('main.generalError'));
+    }
+  };
+
+  const handleBulkGenerate = async () => {
+    setError('');
+    const userId = getUserId();
+    
+    if (!userId) {
+      setError(t('main.loginRequired'));
+      return;
+    }
+    
+    if (!bulkUrls) {
+      setError(t('main.bulkUrlsRequired'));
+      return;
+    }
+
+    const urlList = bulkUrls.split('\n').filter(url => url.trim());
+    if (urlList.length > 10) {
+      setError(t('main.tooManyUrls'));
+      return;
+    }
+
+    try {
+      const response = await axios.post('/api/bulk-shorten', {
+        userId,
+        longUrls: urlList
+      });
+      setBulkResults(response.data);
+    } catch (err) {
+      setError(err.response?.data?.message || t('main.generalError'));
+    }
   };
 
   return (
@@ -118,6 +172,46 @@ const MainPage = () => {
             <Box sx={{ mt: 2 }}>
               <Typography variant="subtitle1">{t('main.originalUrl')}:</Typography>
               <Typography>{retrievedOriginalUrl}</Typography>
+            </Box>
+          )}
+        </Paper>
+
+        <Divider sx={{ my: 4 }} />
+
+        {/* Add Bulk Operation Section */}
+        <Paper sx={{ p: 3, mb: 4 }}>
+          <Typography variant="h6" gutterBottom>
+            {t('main.bulkSection')}
+          </Typography>
+          
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            label={t('main.bulkUrls')}
+            value={bulkUrls}
+            onChange={(e) => setBulkUrls(e.target.value)}
+            margin="normal"
+            helperText={t('main.bulkUrlsHelper')}
+          />
+          <Button
+            variant="contained"
+            onClick={handleBulkGenerate}
+            sx={{ mt: 2 }}
+          >
+            {t('main.generateBulk')}
+          </Button>
+          
+          {bulkResults && (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="subtitle1">{t('main.bulkResults')}:</Typography>
+              {bulkResults.urlMappings.map((mapping, index) => (
+                <Box key={index} sx={{ mt: 1 }}>
+                  <Typography variant="body2" color={mapping.status === 'SUCCESS' ? 'success.main' : 'error.main'}>
+                    {mapping.longUrl} → {mapping.shortUrl || mapping.error}
+                  </Typography>
+                </Box>
+              ))}
             </Box>
           )}
         </Paper>
