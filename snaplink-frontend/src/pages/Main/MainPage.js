@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import { API_BASE_URL } from '../../config/api.js';
 
 const MainPage = () => {
   const { t } = useTranslation();
@@ -43,7 +44,7 @@ const MainPage = () => {
     }
     
     try {
-      const response = await axios.post('/api/shorten', {
+      const response = await axios.post(`${API_BASE_URL}/api/shorten`, {
         userId,
         longUrl: originalUrl
       });
@@ -61,7 +62,7 @@ const MainPage = () => {
     }
 
     try {
-      const response = await axios.get(`/api/url/${retrieveUrl}`);
+      const response = await axios.get(`${API_BASE_URL}/api/url/${retrieveUrl}`);
       setRetrievedOriginalUrl(response.headers.location);
     } catch (err) {
       setError(err.response?.data?.message || t('main.generalError'));
@@ -89,7 +90,7 @@ const MainPage = () => {
     }
 
     try {
-      const response = await axios.post('/api/bulk-shorten', {
+      const response = await axios.post(`${API_BASE_URL}/api/bulk-shorten`, {
         userId,
         longUrls: urlList
       });
