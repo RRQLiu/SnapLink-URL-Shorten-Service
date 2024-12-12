@@ -30,6 +30,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin(origins = "http://localhost:3000")  
 public class UrlController {
     private final UrlShortener urlShortener;
     private final IpPraser ipPraser;
