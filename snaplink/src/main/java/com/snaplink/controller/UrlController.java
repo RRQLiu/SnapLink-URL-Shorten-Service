@@ -3,8 +3,16 @@ package com.snaplink.controller;
 import org.example.BigtableConnector;
 import org.example.IpPraser;
 import org.example.UrlShortener;
-import org.springframework.web.bind.annotation.*;
+
 import com.google.cloud.bigtable.data.v2.BigtableDataClient;
+import com.snaplink.dto.ShortenUrlRequest;
+import com.snaplink.dto.ShortenUrlResponse;
+import com.snaplink.dto.UrlAnalyticsResponse;
+import com.snaplink.service.UrlService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
+import java.time.LocalDate;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -18,20 +26,32 @@ import java.util.Map;
 public class UrlController {
     private final UrlShortener urlShortener;
     private final IpPraser ipPraser;
+    private final UrlService urlService;
 
-    public UrlController() throws Exception {
+
+    public UrlController(UrlService urlService) throws Exception {
         BigtableDataClient dataClient = BigtableConnector.connect();
         this.ipPraser = new IpPraser();
+        this.urlService = urlService;
         this.urlShortener = new UrlShortener(dataClient);
     }
+   
 
     @PostMapping("/shorten")
-    public String shortenUrl(@RequestBody UrlRequest request) throws Exception {
-        return urlShortener.shortenUrl(
-            request.getUserId(),
+    public ResponseEntity<ShortenUrlResponse> shortenUrl(
+            @RequestBody ShortenUrlRequest request,
+            @RequestHeader(value = "X-Forwarded-For", required = false) String forwardedFor,
+            @RequestHeader(value = "User-Agent", required = false) String userAgent) {
+        
+        String ipAddress = forwardedFor != null ? forwardedFor.split(",")[0] : "unknown";
+        String shortUrl = urlService.createShortUrl(
+            request.getUserId(), 
             request.getLongUrl(),
-            java.time.LocalDate.now().toString()
+            ipAddress,
+            userAgent
         );
+
+        return ResponseEntity.ok(new ShortenUrlResponse(shortUrl));
     }
 
     @GetMapping("/url/{shortUrl}")
@@ -46,6 +66,29 @@ public class UrlController {
 
         urlShortener.updateAnalytics(shortUrl, formattedDate, ipPraser.resolveGeolocation(ipAddress));
         return urlShortener.getOriginalUrl(shortUrl);
+    }
+    @GetMapping("/{shortUrl}")
+    public RedirectView redirectToOriginalUrl(
+            @PathVariable String shortUrl,
+            @RequestHeader(value = "X-Forwarded-For", required = false) String forwardedFor,
+            @RequestHeader(value = "User-Agent", required = false) String userAgent) {
+        
+        String ipAddress = forwardedFor != null ? forwardedFor.split(",")[0] : "unknown";
+        String longUrl = urlService.getAndRecordClick(shortUrl, ipAddress, userAgent);
+        return new RedirectView(longUrl);
+    }
+
+    @GetMapping("/analytics/{shortUrl}")
+    public ResponseEntity<UrlAnalyticsResponse> getUrlAnalytics(
+            @PathVariable String shortUrl,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+        
+        LocalDate start = startDate != null ? LocalDate.parse(startDate) : LocalDate.now().minusDays(7);
+        LocalDate end = endDate != null ? LocalDate.parse(endDate) : LocalDate.now();
+        
+        UrlAnalyticsResponse analytics = urlService.getUrlAnalytics(shortUrl, start, end);
+        return ResponseEntity.ok(analytics);
     }
 
     @GetMapping("/analysis")
