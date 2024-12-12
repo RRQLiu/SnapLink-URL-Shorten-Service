@@ -13,7 +13,12 @@ const LanguageSelector = () => {
     <Select
       value={i18n.language}
       onChange={changeLanguage}
-      sx={{ position: 'absolute', top: '1rem', right: '1rem' }}
+      sx={{ 
+        position: 'absolute', 
+        top: '0.2rem', 
+        right: '8rem',
+        color: 'black'
+      }}
     >
       <MenuItem value="en">English</MenuItem>
       <MenuItem value="es">Español</MenuItem>

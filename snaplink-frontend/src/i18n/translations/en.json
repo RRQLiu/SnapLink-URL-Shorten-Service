@@ -1,0 +1,38 @@
+{
+  "nav": {
+    "shortlink": "Shortlink",
+    "myLinks": "My Links",
+    "about": "About Us",
+    "logout": "Logout"
+  },
+  "landing": {
+    "title": "URL Shortener",
+    "subtitle": "Make your links shorter and track their performance",
+    "login": "Login",
+    "register": "Register"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "loginButton": "Login",
+    "registerButton": "Register",
+    "switchToRegister": "Don't have an account? Register",
+    "switchToLogin": "Already have an account? Login",
+    "error": "Authentication failed"
+  },
+  "main": {
+    "title": "URL Shortener",
+    "createSection": "Create Short URL",
+    "retrieveSection": "Retrieve Original URL",
+    "originalUrl": "Original URL",
+    "customName": "Custom Name (Optional)",
+    "customNameHelper": "Leave empty for random name",
+    "generate": "Generate",
+    "retrieve": "Retrieve",
+    "result": "Short URL",
+    "urlRequired": "Please enter a URL",
+    "retrieveUrlRequired": "Please enter a short URL"
+  }
+} 

@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "shortlink": "Acortador",
+    "myLinks": "Mis Enlaces",
+    "about": "Sobre Nosotros",
+    "logout": "Cerrar Sesión"
+  },
+  "landing": {
+    "title": "Acortador de URLs",
+    "subtitle": "Haz tus enlaces más cortos y rastrea su rendimiento",
+    "login": "Iniciar Sesión",
+    "register": "Registrarse"
+  },
+  "auth": {
+    "login": "Iniciar Sesión",
+    "register": "Registrarse",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "loginButton": "Iniciar Sesión",
+    "registerButton": "Registrarse",
+    "switchToRegister": "¿No tienes cuenta? Regístrate",
+    "switchToLogin": "¿Ya tienes cuenta? Inicia sesión",
+    "error": "Error de autenticación"
+  },
+  "main": {
+    "title": "Acortador de URLs",
+    "createSection": "Crear URL Corta",
+    "retrieveSection": "Recuperar URL Original",
+    "originalUrl": "URL Original",
+    "customName": "Nombre Personalizado (Opcional)",
+    "customNameHelper": "Dejar en blanco para nombre aleatorio",
+    "generate": "Generar",
+    "retrieve": "Recuperar",
+    "result": "URL Corta",
+    "urlRequired": "Por favor ingrese una URL",
+    "retrieveUrlRequired": "Por favor ingrese una URL corta"
+  },
+  "myLinks": {
+    "title": "Mis Enlaces",
+    "originalUrl": "URL Original",
+    "shortUrl": "URL Corta",
+    "createdAt": "Fecha de Creación",
+    "clicks": "Clics",
+    "actions": "Acciones"
+  },
+  "analytics": {
+    "title": "Análisis",
+    "totalClicks": "Clics Totales",
+    "uniqueVisitors": "Visitantes Únicos",
+    "topCountries": "Países Principales",
+    "browsers": "Navegadores",
+    "clicks": "clics",
+    "users": "usuarios"
+  },
+  "about": {
+    "title": "Sobre Nosotros",
+    "missionTitle": "Nuestra Misión",
+    "missionText": "Nuestra misión es proporcionar una herramienta simple y eficiente para acortar URLs y analizar su rendimiento.",
+    "teamTitle": "Nuestro Equipo",
+    "member1Description": "Desarrollador frontend con experiencia en React y diseño de interfaces.",
+    "member2Description": "Desarrollador backend especializado en arquitectura de sistemas.",
+    "member3Description": "Diseñador UI/UX apasionado por la experiencia del usuario.",
+    "member4Description": "Gerente de proyecto con amplia experiencia en desarrollo de software."
+  }
+} 

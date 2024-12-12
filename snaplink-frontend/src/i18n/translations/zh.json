@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "shortlink": "短链接",
+    "myLinks": "我的链接",
+    "about": "关于我们",
+    "logout": "退出登录"
+  },
+  "landing": {
+    "title": "网址缩短器",
+    "subtitle": "缩短您的链接并追踪其表现",
+    "login": "登录",
+    "register": "注册"
+  },
+  "auth": {
+    "login": "登录",
+    "register": "注册",
+    "email": "电子邮箱",
+    "password": "密码",
+    "loginButton": "登录",
+    "registerButton": "注册",
+    "switchToRegister": "没有账号？立即注册",
+    "switchToLogin": "已有账号？立即登录",
+    "error": "认证失败"
+  },
+  "main": {
+    "title": "网址缩短器",
+    "createSection": "创建短链接",
+    "retrieveSection": "获取原始链接",
+    "originalUrl": "原始网址",
+    "customName": "自定义名称（可选）",
+    "customNameHelper": "留空则随机生成",
+    "generate": "生成",
+    "retrieve": "获取",
+    "result": "短链接",
+    "urlRequired": "请输入网址",
+    "retrieveUrlRequired": "请输入短链接"
+  },
+  "myLinks": {
+    "title": "我的链接",
+    "originalUrl": "原始网址",
+    "shortUrl": "短链接",
+    "createdAt": "创建时间",
+    "clicks": "点击次数",
+    "actions": "操作"
+  },
+  "analytics": {
+    "title": "数据分析",
+    "totalClicks": "总点击量",
+    "uniqueVisitors": "独立访客",
+    "topCountries": "主要国家/地区",
+    "browsers": "浏览器",
+    "clicks": "次点击",
+    "users": "用户"
+  },
+  "about": {
+    "title": "关于我们",
+    "missionTitle": "我们的使命",
+    "missionText": "我们的使命是提供一个简单高效的工具来缩短网址并分析其性能。",
+    "teamTitle": "我们的团队",
+    "member1Description": "前端开发工程师，擅长React和界面设计。",
+    "member2Description": "后端开发工程师，专注于系统架构。",
+    "member3Description": "UI/UX设计师，致力于提升用户体验。",
+    "member4Description": "项目经理，拥有丰富的软件开发经验。"
+  }
+} 
