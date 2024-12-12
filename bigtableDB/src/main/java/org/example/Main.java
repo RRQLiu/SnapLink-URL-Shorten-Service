@@ -1,6 +1,7 @@
 package org.example;
 
 import com.google.cloud.bigtable.data.v2.BigtableDataClient;
+import com.google.gson.JsonObject;
 
 import java.io.IOException;
 
@@ -13,13 +14,16 @@ public class Main {
             BigtableDataClient dataClient = BigtableConnector.connect();
             UrlShortener urlShortener = new UrlShortener(dataClient);
 
-            String userId = "user001";
+            String userId = "user002";
             String name = "Test User";
             String email = "test@example.com";
             String userCreationDate = "2024-12-01";
-            urlShortener.addUser(userId, name, email, userCreationDate);
+            String salt = "don't guess";
+            String hashedPassword = "snfllsnglewnglew";
+            urlShortener.addUser(userId, name, email, userCreationDate, salt, hashedPassword);
             System.out.println("User added: " + name);
-
+            JsonObject result = urlShortener.getUser("user002");
+            System.out.println(result.toString());
             String[] longUrls = {
                     "https://1st-resource",
                     "https://2nd-resource",
