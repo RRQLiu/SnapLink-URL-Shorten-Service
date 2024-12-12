@@ -1,0 +1,361 @@
+openapi: 3.0.3
+info:
+  title: SnapLink Service API
+  description: |
+    This API provides user authentication (register/login/logout), shortlink generation, bulk shortlink creation, retrieval and management of user-created shortlinks, and analytics for shortlinks.
+  version: 1.0.0
+servers:
+- url: https://virtserver.swaggerhub.com/FEILI043_1/shortlink/1.0.0
+  description: SwaggerHub API Auto Mocking
+- url: https://api.example.com
+  description: Production server
+tags:
+- name: Auth
+  description: User authentication endpoints.
+- name: Shortlinks
+  description: "Endpoints for creating, retrieving, and managing shortlinks."
+- name: Analysis
+  description: Endpoints for retrieving analytics data of shortlinks.
+paths:
+  /auth/register:
+    post:
+      tags:
+      - Auth
+      summary: Register a new user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+        required: true
+      responses:
+        "201":
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        "400":
+          description: "Bad request (e.g., email already taken)"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /auth/login:
+    post:
+      tags:
+      - Auth
+      summary: Login an existing user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      responses:
+        "200":
+          description: Successfully logged in
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /auth/logout:
+    post:
+      tags:
+      - Auth
+      summary: Logout the current user
+      responses:
+        "204":
+          description: Successfully logged out
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+  /shortlinks:
+    get:
+      tags:
+      - Shortlinks
+      summary: Retrieve all shortlinks created by the authenticated user
+      responses:
+        "200":
+          description: A list of shortlinks owned by the user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ShortlinkItem'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+    post:
+      tags:
+      - Shortlinks
+      summary: Create a new shortlink
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateShortlinkRequest'
+        required: true
+      responses:
+        "201":
+          description: Shortlink created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShortlinkItem'
+        "400":
+          description: "Bad request (e.g., invalid URL)"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+  /shortlinks/{id}:
+    get:
+      tags:
+      - Shortlinks
+      summary: Retrieve details of a single shortlink by its ID
+      parameters:
+      - name: id
+        in: path
+        description: The ID or token of the shortlink
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Details of the requested shortlink
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShortlinkItem'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "404":
+          description: Shortlink not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+  /shortlinks/bulk:
+    post:
+      tags:
+      - Shortlinks
+      summary: Create multiple shortlinks in bulk (up to 50)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkShortlinkRequest'
+        required: true
+      responses:
+        "201":
+          description: Bulk shortlinks created successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ShortlinkItem'
+        "400":
+          description: "Bad request (e.g., more than 50 links or invalid URLs)"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+  /analysis:
+    get:
+      tags:
+      - Analysis
+      summary: Retrieve analytics data for a given shortlink
+      parameters:
+      - name: link
+        in: query
+        description: The shortlink token or ID
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Analytics data for the requested shortlink
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisResponse'
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "404":
+          description: Shortlink not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+      - bearerAuth: []
+components:
+  schemas:
+    RegisterRequest:
+      required:
+      - email
+      - password
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    LoginRequest:
+      required:
+      - email
+      - password
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    AuthResponse:
+      type: object
+      properties:
+        user_id:
+          type: string
+        email:
+          type: string
+          format: email
+        token:
+          type: string
+          description: JWT token to be used for authenticated requests
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+    CreateShortlinkRequest:
+      required:
+      - url
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+    BulkShortlinkRequest:
+      required:
+      - urls
+      type: object
+      properties:
+        urls:
+          maxItems: 50
+          type: array
+          items:
+            type: string
+            format: uri
+    ShortlinkItem:
+      type: object
+      properties:
+        id:
+          type: string
+        short_url:
+          type: string
+          format: uri
+        original_url:
+          type: string
+          format: uri
+        created_at:
+          type: string
+          format: date-time
+        click_count:
+          type: integer
+          description: Number of times the shortlink has been clicked
+    AnalysisResponse:
+      type: object
+      properties:
+        link:
+          type: string
+          format: uri
+        metrics:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnalysisResponse_metrics'
+    AnalysisResponse_country:
+      type: object
+      properties:
+        name:
+          type: string
+          description: "Country code (e.g., \"us\")"
+          example: us
+        clike:
+          type: integer
+          description: Clicks from the country
+          example: 10
+    AnalysisResponse_metrics:
+      type: object
+      properties:
+        date:
+          type: string
+          description: Date in YYYYMMDD format
+          format: date
+        click:
+          type: integer
+          description: Total number of clicks
+          example: 10
+        country:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnalysisResponse_country'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
