@@ -5,10 +5,13 @@ import com.google.cloud.bigtable.data.v2.models.RowMutation;
 import com.google.cloud.bigtable.data.v2.models.Row;
 import com.google.cloud.bigtable.data.v2.models.RowCell;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Base64;
 import com.google.cloud.bigtable.data.v2.models.Query;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+
 import com.google.cloud.bigtable.data.v2.models.Filters;
 import com.google.cloud.bigtable.data.v2.models.Query;
 public class UrlShortener {
@@ -146,7 +149,11 @@ public class UrlShortener {
     }
 
     // Query multiple rows in a range (e.g., for a date range)
-    public void queryAnalytics(String shortUrl, String startDate, String endDate) throws IOException {
+    public ArrayList<HashMap<String, String>> queryAnalytics(
+            String shortUrl,
+            String startDate,
+            String endDate
+    ) throws IOException {
         if (startDate.compareTo(endDate) > 0) {
             throw new IllegalArgumentException("Start date must be less than end date.");
         }
@@ -157,12 +164,25 @@ public class UrlShortener {
         Query query = Query.create(ANALYTICS_TABLE_ID)
                 .range(startKey, endKey);
 
+        ArrayList<HashMap<String, String>> rowsData = new ArrayList<>();
+
         dataClient.readRows(query).forEach(row -> {
-            System.out.println("Row key: " + row.getKey().toStringUtf8());
+            HashMap<String, String> rowMap = new HashMap<>();
+
+            String rowKey = row.getKey().toStringUtf8();
+            String dateStr = rowKey.split("#")[1];
+//            rowMap.put("rowKey", rowKey); // Store the row key
+            rowMap.put("date", dateStr);
+
             row.getCells().forEach(cell -> {
-                System.out.printf("%s: %s\n", cell.getQualifier().toStringUtf8(), cell.getValue().toStringUtf8());
+                // Store each cell's qualifier and value as key-value pairs
+                String column = cell.getQualifier().toStringUtf8();
+                rowMap.putIfAbsent(column, cell.getValue().toStringUtf8());
             });
+            rowsData.add(rowMap); // Add the row data to the list
         });
+
+        return rowsData;
     }
 
 
