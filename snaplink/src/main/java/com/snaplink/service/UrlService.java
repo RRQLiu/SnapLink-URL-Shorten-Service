@@ -18,4 +18,5 @@ public interface UrlService {
                               String ipAddress, String userAgent);
 
     String getLongUrl(String shortUrl);
+    void deleteLink(String shortUrl, String userId);
 }

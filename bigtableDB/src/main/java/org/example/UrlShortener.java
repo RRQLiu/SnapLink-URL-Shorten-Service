@@ -319,6 +319,26 @@ public class UrlShortener {
         dataClient.mutateRow(rowMutation);
         return customName;
     }
+
+    public void deleteAnalytics(String shortUrl) throws IOException {
+        // Query all analytics rows for this shortUrl
+        String startKey = shortUrl + "#";
+        String endKey = shortUrl + "#z"; // This will cover all possible dates
+        
+        Query query = Query.create(ANALYTICS_TABLE_ID)
+            .range(startKey, endKey);
+        
+        // Delete each analytics row found
+        dataClient.readRows(query).forEach(row -> {
+            try {
+                String rowKey = row.getKey().toStringUtf8();
+                deleteRow(ANALYTICS_TABLE_ID, rowKey);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to delete analytics row", e);
+            }
+        });
+    }
+    
 public  static String getLongUrlKey() {
     return LONG_URL_COLUMN;
 }
