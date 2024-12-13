@@ -100,7 +100,7 @@ public class UrlController {
         return ResponseEntity.ok(analytics);
     }
 
-    @GetMapping("/analysis")
+    @PostMapping("/analysis")
     public LinkMetricsResponse getAnalysisMetrics(
             @RequestBody Map<String, String> requestBody
     ) throws IOException {
