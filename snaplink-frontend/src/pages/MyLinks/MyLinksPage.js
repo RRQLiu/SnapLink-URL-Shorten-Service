@@ -16,32 +16,40 @@ import {
 import { useNavigate } from 'react-router-dom';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
 import { useTranslation } from 'react-i18next';
+import axios from 'axios';
+import { API_BASE_URL } from "../../config/api.js";
 
 const MyLinksPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [links, setLinks] = useState([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    // Mock data for testing
-    setLinks([
-      {
-        id: 1,
-        originalUrl: 'https://www.example.com/very/long/url/1',
-        shortUrl: 'http://short.ly/abc123',
-        createdAt: '2024-02-01',
-        clicks: 150
-      },
-      {
-        id: 2,
-        originalUrl: 'https://www.example.com/another/long/url/2',
-        shortUrl: 'http://short.ly/def456',
-        createdAt: '2024-02-02',
-        clicks: 75
-      },
-      // Add more mock data as needed
-    ]);
-  }, []);
+    const fetchLinks = async () => {
+      try {
+        const userId = localStorage.getItem("userID");
+        if (!userId) {
+          setError(t("myLinks.loginRequired"));
+          return;
+        }
+
+        const response = await axios.get(`${API_BASE_URL}/api/users/${userId}/links`);
+        setLinks(response.data.links.map(link => ({
+          id: link.shortUrl, // Using shortUrl as id since it's unique
+          originalUrl: link.longUrl,
+          shortUrl: `${API_BASE_URL}/url/${link.shortUrl}`,
+          createdAt: link.creationDate,
+          clicks: link.totalClicks,
+          active: link.active
+        })));
+      } catch (err) {
+        setError(err.response?.data?.message || t("myLinks.fetchError"));
+      }
+    };
+
+    fetchLinks();
+  }, [t]);
 
   return (
     <Container maxWidth="lg">
