@@ -1,6 +1,5 @@
 package-lock.json
 node_modules/
-*.json
 *.idea*
 *.gradle*
 build/

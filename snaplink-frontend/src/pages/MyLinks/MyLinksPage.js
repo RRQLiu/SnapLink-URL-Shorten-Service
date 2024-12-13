@@ -161,10 +161,10 @@ const MyLinksPage = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteDialogOpen(false)}>
-            {t('common.cancel')}
+            {t('myLinks.cancel')}
           </Button>
           <Button onClick={handleDeleteConfirm} color="error" autoFocus>
-            {t('common.delete')}
+            {t('myLinks.deleteConfirmButton')}
           </Button>
         </DialogActions>
       </Dialog>

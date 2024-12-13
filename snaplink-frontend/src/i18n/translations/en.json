@@ -68,7 +68,12 @@
     "shortUrl": "Short URL",
     "createdAt": "Created At",
     "clicks": "Clicks",
-    "actions": "Actions"
+    "actions": "Actions",
+    "deleteConfirmTitle": "Delete Link",
+    "deleteConfirmMessage": "Are you sure you want to delete this link?",
+    "deleteConfirmButton": "Delete",
+    "cancel": "Cancel",
+    "deleteError": "Failed to delete link"
   },
   "analytics": {
     "title": "Analytics",
