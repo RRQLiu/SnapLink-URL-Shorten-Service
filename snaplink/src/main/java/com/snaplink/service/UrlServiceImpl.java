@@ -52,7 +52,7 @@ public class UrlServiceImpl implements UrlService {
             // Record initial analytics
             String date = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
             String country = getCountryFromIP(ipAddress);
-            urlShortener.updateAnalytics(shortUrl, date, country);
+            urlShortener.updateAnalytics(shortUrl, date, "US");
 
             return shortUrl;
         } catch (IOException e) {
