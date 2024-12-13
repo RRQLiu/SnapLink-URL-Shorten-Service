@@ -11,19 +11,27 @@ import {
   TableRow,
   Button,
   IconButton,
-  Box
+  Box,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API_BASE_URL } from "../../config/api.js";
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const MyLinksPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [links, setLinks] = useState([]);
   const [error, setError] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [linkToDelete, setLinkToDelete] = useState(null);
 
   useEffect(() => {
     const fetchLinks = async () => {
@@ -50,6 +58,33 @@ const MyLinksPage = () => {
 
     fetchLinks();
   }, [t]);
+
+  const handleDeleteClick = (link) => {
+    setLinkToDelete(link);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      const userId = localStorage.getItem("userID");
+      await axios.delete(`${API_BASE_URL}/links/${linkToDelete.id}?userId=${userId}`);
+      
+      // Refetch the links
+      const response = await axios.get(`${API_BASE_URL}/users/${userId}/links`);
+      setLinks(response.data.links.map(link => ({
+        id: link.shortUrl,
+        originalUrl: link.longUrl,
+        shortUrl: `${API_BASE_URL}/url/${link.shortUrl}`,
+        createdAt: link.creationDate,
+        clicks: link.totalClicks,
+        active: link.active
+      })));
+    } catch (err) {
+      setError(err.response?.data?.message || t("myLinks.deleteError"));
+    }
+    setDeleteDialogOpen(false);
+    setLinkToDelete(null);
+  };
 
   return (
     <Container maxWidth="lg">
@@ -101,6 +136,12 @@ const MyLinksPage = () => {
                     >
                       <AnalyticsIcon />
                     </IconButton>
+                    <IconButton 
+                      color="error"
+                      onClick={() => handleDeleteClick(link)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
                   </TableCell>
                 </TableRow>
               ))}
@@ -108,6 +149,25 @@ const MyLinksPage = () => {
           </Table>
         </TableContainer>
       </Box>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+      >
+        <DialogTitle>{t('myLinks.deleteConfirmTitle')}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {t('myLinks.deleteConfirmMessage')}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>
+            {t('common.cancel')}
+          </Button>
+          <Button onClick={handleDeleteConfirm} color="error" autoFocus>
+            {t('common.delete')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
