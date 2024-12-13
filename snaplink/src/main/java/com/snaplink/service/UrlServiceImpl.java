@@ -216,8 +216,18 @@ public String createCustomShortUrl(String userId, String longUrl, String customN
     } catch (IOException e) {
         throw new RuntimeException("Failed to create custom short URL", e);
     }
-}
+    }
 
-
+    public String getLongUrl(String shortUrl)  {
+        try {
+            String longUrl = urlShortener.getOriginalUrl(shortUrl);
+            if (longUrl == null) {
+                throw new UrlNotFoundException("URL not found");
+            }
+            return longUrl;
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to retrieve long URL", e);
+        }
+    }
 
 }

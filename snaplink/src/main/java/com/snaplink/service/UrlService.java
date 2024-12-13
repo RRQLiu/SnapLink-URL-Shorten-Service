@@ -16,4 +16,6 @@ public interface UrlService {
     UserLinksResponse getUserLinks(String userId);
     String createCustomShortUrl(String userId, String longUrl, String customName, 
                               String ipAddress, String userAgent);
+
+    String getLongUrl(String shortUrl);
 }

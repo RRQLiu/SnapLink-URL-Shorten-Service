@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -198,7 +199,20 @@ public ResponseEntity<?> createCustomShortUrl(
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body("Failed to create custom short URL");
+        }
     }
+    @GetMapping("/retrieve/{shortUrl}")
+    public ResponseEntity<Map<String, String>> retrieveOriginalUrl(@PathVariable String shortUrl) {
+        try {
+            String longUrl = urlService.getLongUrl(shortUrl);  // You'll need to add this method to UrlService
+            Map<String, String> response = new HashMap<>();
+            response.put("longUrl", longUrl);
+        return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(Collections.singletonMap("error", "Short URL not found"));
+        }
 }
 }
 
