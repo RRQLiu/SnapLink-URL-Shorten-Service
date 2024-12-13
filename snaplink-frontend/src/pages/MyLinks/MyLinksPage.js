@@ -17,6 +17,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  TableSortLabel,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import AnalyticsIcon from '@mui/icons-material/Analytics';
@@ -32,6 +33,8 @@ const MyLinksPage = () => {
   const [error, setError] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [linkToDelete, setLinkToDelete] = useState(null);
+  const [orderBy, setOrderBy] = useState('createdAt');
+  const [order, setOrder] = useState('desc');
 
   useEffect(() => {
     const fetchLinks = async () => {
@@ -86,6 +89,22 @@ const MyLinksPage = () => {
     setLinkToDelete(null);
   };
 
+  const handleRequestSort = (property) => {
+    const isAsc = orderBy === property && order === 'asc';
+    setOrder(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+
+  const compareValues = (a, b) => {
+    if (orderBy === 'clicks') {
+      return order === 'asc' ? a.clicks - b.clicks : b.clicks - a.clicks;
+    }
+    // For createdAt
+    return order === 'asc' 
+      ? new Date(a.createdAt) - new Date(b.createdAt)
+      : new Date(b.createdAt) - new Date(a.createdAt);
+  };
+
   return (
     <Container maxWidth="lg">
       <Box sx={{ mt: 4, mb: 6 }}>
@@ -104,10 +123,22 @@ const MyLinksPage = () => {
                   {t('myLinks.shortUrl')}
                 </TableCell>
                 <TableCell sx={{ width: '15%', whiteSpace: 'normal' }}>
-                  {t('myLinks.createdAt')}
+                  <TableSortLabel
+                    active={orderBy === 'createdAt'}
+                    direction={orderBy === 'createdAt' ? order : 'asc'}
+                    onClick={() => handleRequestSort('createdAt')}
+                  >
+                    {t('myLinks.createdAt')}
+                  </TableSortLabel>
                 </TableCell>
                 <TableCell sx={{ width: '10%' }}>
-                  {t('myLinks.clicks')}
+                  <TableSortLabel
+                    active={orderBy === 'clicks'}
+                    direction={orderBy === 'clicks' ? order : 'asc'}
+                    onClick={() => handleRequestSort('clicks')}
+                  >
+                    {t('myLinks.clicks')}
+                  </TableSortLabel>
                 </TableCell>
                 <TableCell sx={{ width: '10%' }}>
                   {t('myLinks.actions')}
@@ -115,7 +146,7 @@ const MyLinksPage = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {links.map((link) => (
+              {[...links].sort(compareValues).map((link) => (
                 <TableRow key={link.id}>
                   <TableCell sx={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
                     {link.originalUrl}

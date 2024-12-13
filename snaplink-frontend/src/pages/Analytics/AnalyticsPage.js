@@ -13,6 +13,7 @@ import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
 import { API_BASE_URL } from "../../config/api.js";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 
 const AnalyticsPage = () => {
   const { id } = useParams();
@@ -29,33 +30,38 @@ const AnalyticsPage = () => {
           return;
         }
 
-        // Get analytics data
-
         const response = await axios.post(`${API_BASE_URL}/analysis`, {
           shortUrl: id,
         });
 
+        // Process the metrics data
+        const totalClicks = response.data.metrics.reduce((sum, day) => sum + day.click, 0);
+        
+        // Process daily clicks data for line chart
+        const dailyClicks = response.data.metrics.map(day => ({
+          date: formatDate(day.date),
+          clicks: day.click
+        }));
+
+        // Process country data for bar chart
+        const countryData = {};
+        response.data.metrics.forEach(day => {
+          day.country.forEach(country => {
+            if (country.name !== 'IP address unavailable' && country.name !== 'UNKNOWN') {
+              countryData[country.name] = (countryData[country.name] || 0) + country.click;
+            }
+          });
+        });
+
+        const topCountries = Object.entries(countryData)
+          .map(([name, clicks]) => ({ name, clicks }))
+          .sort((a, b) => b.clicks - a.clicks)
+          .slice(0, 5);
+
         setAnalytics({
-          totalClicks: response.data.totalClicks,
-          uniqueVisitors: response.data.totalClicks, // If unique visitors isn't provided separately
-          topCountries: Object.entries(response.data.clicksByCountry)
-            .map(([country, clicks]) => ({
-              country,
-              clicks,
-            }))
-            .sort((a, b) => b.clicks - a.clicks),
-          dailyClicks: Object.entries(response.data.clicksByDate).map(
-            ([date, clicks]) => ({
-              date,
-              clicks,
-            })
-          ),
-          browsers: Object.entries(response.data.clicksByBrowser).map(
-            ([name, count]) => ({
-              name,
-              count,
-            })
-          ),
+          totalClicks,
+          dailyClicks,
+          topCountries
         });
       } catch (err) {
         setError(err.response?.data?.message || t("analytics.fetchError"));
@@ -66,6 +72,13 @@ const AnalyticsPage = () => {
       fetchAnalytics();
     }
   }, [id, t]);
+
+  // Helper function to format date from YYYYMMDD to MM/DD
+  const formatDate = (dateStr) => {
+    const month = dateStr.substring(4, 6);
+    const day = dateStr.substring(6, 8);
+    return `${month}/${day}`;
+  };
 
   if (error) {
     return (
@@ -89,57 +102,53 @@ const AnalyticsPage = () => {
         </Typography>
 
         <Grid container spacing={3}>
-          {/* Overview Cards */}
-          <Grid item xs={12} md={6}>
+          {/* Total Clicks Card */}
+          <Grid item xs={12}>
             <Card>
               <CardContent>
-                <Typography variant="h6">
-                  {t("analytics.totalClicks")}
-                </Typography>
-                <Typography variant="h3">{analytics.totalClicks}</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">
-                  {t("analytics.uniqueVisitors")}
-                </Typography>
-                <Typography variant="h3">{analytics.uniqueVisitors}</Typography>
+                <Typography variant="h6">{t("analytics.totalClicks")}</Typography>
+                <Typography variant="h3">{analytics?.totalClicks || 0}</Typography>
               </CardContent>
             </Card>
           </Grid>
 
-          {/* Top Countries */}
-          <Grid item xs={12} md={6}>
+          {/* Daily Clicks Line Chart */}
+          <Grid item xs={12}>
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                {t("analytics.dailyClicks")}
+              </Typography>
+              <Box sx={{ height: 300 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={analytics?.dailyClicks}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line type="monotone" dataKey="clicks" stroke="#8884d8" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </Box>
+            </Paper>
+          </Grid>
+
+          {/* Top Countries Bar Chart */}
+          <Grid item xs={12}>
             <Paper sx={{ p: 2 }}>
               <Typography variant="h6" gutterBottom>
                 {t("analytics.topCountries")}
               </Typography>
-              {analytics.topCountries.map((country, index) => (
-                <Box key={index} sx={{ mb: 1 }}>
-                  <Typography>
-                    {country.country}: {country.clicks} {t("analytics.clicks")}
-                  </Typography>
-                </Box>
-              ))}
-            </Paper>
-          </Grid>
-
-          {/* Browsers */}
-          <Grid item xs={12} md={6}>
-            <Paper sx={{ p: 2 }}>
-              <Typography variant="h6" gutterBottom>
-                {t("analytics.browsers")}
-              </Typography>
-              {analytics.browsers.map((browser, index) => (
-                <Box key={index} sx={{ mb: 1 }}>
-                  <Typography>
-                    {browser.name}: {browser.count} {t("analytics.users")}
-                  </Typography>
-                </Box>
-              ))}
+              <Box sx={{ height: 300 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={analytics?.topCountries}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="clicks" fill="#8884d8" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </Box>
             </Paper>
           </Grid>
         </Grid>

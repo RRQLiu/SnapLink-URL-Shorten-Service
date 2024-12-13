@@ -62,7 +62,7 @@ function App() {
               path="/my-links"
               element={isAuthenticated ? <MyLinksPage /> : <Navigate to="/" />}
             />
-            <Route path="/about" element={<AboutPage />} />
+            <Route path="/about" element={isAuthenticated ? <AboutPage /> : <Navigate to="/" />} />
             <Route
               path="/analytics/:id"
               element={

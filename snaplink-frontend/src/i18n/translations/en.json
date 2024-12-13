@@ -82,6 +82,7 @@
     "topCountries": "Top Countries",
     "browsers": "Browsers",
     "clicks": "Clicks",
-    "users": "Users"
+    "users": "Users",
+    "dailyClicks": "Daily Clicks"
   }
 }

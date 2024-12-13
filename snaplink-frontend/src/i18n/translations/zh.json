@@ -60,7 +60,8 @@
     "topCountries": "主要国家/地区",
     "browsers": "浏览器",
     "clicks": "次点击",
-    "users": "用户"
+    "users": "用户",
+    "dailyClicks": "每日点击量"
   },
   "about": {
     "title": "关于我们",

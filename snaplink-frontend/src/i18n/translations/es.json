@@ -60,7 +60,8 @@
     "topCountries": "Países Principales",
     "browsers": "Navegadores",
     "clicks": "clics",
-    "users": "usuarios"
+    "users": "usuarios",
+    "dailyClicks": "Clics Diarios"
   },
   "about": {
     "title": "Sobre Nosotros",
