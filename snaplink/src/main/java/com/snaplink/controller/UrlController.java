@@ -73,7 +73,7 @@ public class UrlController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
         String formattedDate = currentDate.format(formatter);
 
-        urlShortener.updateAnalytics(shortUrl, formattedDate, ipPraser.resolveGeolocation(ipAddress));
+        urlShortener.updateAnalytics(shortUrl, formattedDate, "US");
         return new RedirectView(urlShortener.getOriginalUrl(shortUrl));
     }
     @GetMapping("/{shortUrl}")
