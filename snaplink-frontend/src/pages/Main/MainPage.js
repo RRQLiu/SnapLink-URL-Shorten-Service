@@ -50,7 +50,7 @@ const MainPage = () => {
         response = await axios.post(`${API_BASE_URL}/custom-shorten`, {
           userId,
           longUrl: originalUrl,
-          customName: customName.trim()
+          customName: customName.trim(),
         });
       } else {
         // Use original shorten endpoint when no custom name
@@ -193,7 +193,7 @@ const MainPage = () => {
                 {t("main.originalUrl")}:
               </Typography>
               <Typography>
-                <a 
+                <a
                   href={retrievedOriginalUrl}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -239,23 +239,36 @@ const MainPage = () => {
                 <Box key={index} sx={{ mt: 1 }}>
                   <Typography
                     variant="body2"
-                    color={
-                      mapping.status === "SUCCESS"
-                        ? "success.main"
-                        : "error.main"
-                    }
+                    sx={{
+                      wordBreak: "break-word",
+                      overflowWrap: "break-word",
+                    }}
                   >
-                    {mapping.longUrl} → {
-                      mapping.status === "SUCCESS" ? (
-                        <a 
+                    <span style={{ color: "#2e7d32", fontWeight: "bold" }}>
+                      {index + 1}.{" "}
+                    </span>
+                    <span style={{ color: "#2e7d32" }}>{mapping.longUrl}</span>
+                    <span style={{ color: "black", margin: "0 8px" }}>--></span>
+                    <span
+                      style={{
+                        color:
+                          mapping.status === "SUCCESS"
+                            ? "#2e7d32"
+                            : "error.main",
+                      }}
+                    >
+                      {mapping.status === "SUCCESS" ? (
+                        <a
                           href={`${API_BASE_URL}/url/${mapping.shortUrl}`}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
                           {`${API_BASE_URL}/url/${mapping.shortUrl}`}
                         </a>
-                      ) : mapping.error
-                    }
+                      ) : (
+                        mapping.error
+                      )}
+                    </span>
                   </Typography>
                 </Box>
               ))}
