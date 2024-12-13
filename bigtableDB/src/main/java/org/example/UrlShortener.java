@@ -22,6 +22,7 @@ import java.util.HashMap;
 
 import com.google.cloud.bigtable.data.v2.models.Filters;
 import com.google.cloud.bigtable.data.v2.models.Query;
+import com.google.gson.JsonObject;
 public class UrlShortener {
     private final BigtableDataClient dataClient;
 
@@ -34,18 +35,47 @@ public class UrlShortener {
 
     private static final String STATUS_COLUMN = "status";
 
+    private static final String SALT_COLUMN = "salt";
+    private static final String HASHED_PASSWORD_COLUMN = "hashed_password";
+
+
     public UrlShortener(BigtableDataClient dataClient) {
         this.dataClient = dataClient;
     }
 
     // Method to add a new user
-    public void addUser(String userId, String name, String email, String creationDate) throws IOException {
+    public void addUser(String userId, String name, String email, String creationDate, String salt, String hashedPassword) throws IOException {
         RowMutation rowMutation = RowMutation.create(BigtableConnector.USER_TABLE_ID, userId)
                 .setCell(USER_COLUMN_FAMILY, "name", name)
                 .setCell(USER_COLUMN_FAMILY, "email", email)
+                .setCell(USER_COLUMN_FAMILY, SALT_COLUMN, salt)
+                .setCell(USER_COLUMN_FAMILY, HASHED_PASSWORD_COLUMN, hashedPassword)
                 .setCell(USER_COLUMN_FAMILY, CREATION_DATE_COLUMN, creationDate);
         dataClient.mutateRow(rowMutation);
     }
+    public JsonObject getUser(String userId) throws IOException {
+        // Fetch the user row by userId
+        Row row = dataClient.readRow(BigtableConnector.USER_TABLE_ID, userId);
+
+        // Check if the row exists
+        if (row == null) {
+            JsonObject errorResponse = new JsonObject();
+            errorResponse.addProperty("error", "User not found");
+            return errorResponse;
+        }
+
+        // Extract column values from the row
+        JsonObject userJson = new JsonObject();
+        userJson.addProperty("userId", userId);
+        userJson.addProperty("name", row.getCells(USER_COLUMN_FAMILY, "name").get(0).getValue().toStringUtf8());
+        userJson.addProperty("email", row.getCells(USER_COLUMN_FAMILY, "email").get(0).getValue().toStringUtf8());
+        userJson.addProperty("salt", row.getCells(USER_COLUMN_FAMILY, SALT_COLUMN).get(0).getValue().toStringUtf8());
+        userJson.addProperty("hashedPassword", row.getCells(USER_COLUMN_FAMILY, HASHED_PASSWORD_COLUMN).get(0).getValue().toStringUtf8());
+        userJson.addProperty("creationDate", row.getCells(USER_COLUMN_FAMILY, CREATION_DATE_COLUMN).get(0).getValue().toStringUtf8());
+
+        return userJson;
+    }
+
 
     // Method to add a new shortened URL for a user
     public String shortenUrl(String userId, String longUrl, String creationDate) throws IOException {

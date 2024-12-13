@@ -16,7 +16,10 @@ public class BigtableConnector {
 
     public static BigtableDataClient connect() throws IOException {
         String keyPath = "../snaplink/src/main/resources/apiKey.json";
+//        String keyPath = "../bigtableDB/src/main/resources/apiKey.json";
+
         File file = new File(keyPath);
+
         System.out.println("Looking for API key at: " + file.getAbsolutePath());
         System.out.println("File exists: " + file.exists());
         
