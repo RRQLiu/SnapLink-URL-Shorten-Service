@@ -237,59 +237,52 @@ public class UrlShortener {
             Map<String, String> linkData = new HashMap<>();
             linkData.put("shortUrl", shortUrl);
             
-            // Get the full row data
+            // Get the full row data with latest version only
             Row fullRow = dataClient.readRow(BigtableConnector.LINK_TABLE_ID, shortUrl);
-            System.out.println("Reading full row data for shortUrl: " + shortUrl);
             
-            // Debug print all cells
-            for (RowCell cell : fullRow.getCells(LINK_COLUMN_FAMILY)) {
-                String qualifier = cell.getQualifier().toStringUtf8();
-                String value = cell.getValue().toStringUtf8();
-                System.out.println("Column: " + qualifier + ", Value: " + value);
-            }
-    
             // Get long URL
             String longUrl = getOriginalUrl(shortUrl);
             linkData.put(LONG_URL_COLUMN, longUrl);
     
-            // Get creation date directly
+            // Get creation date
             List<RowCell> dateCell = fullRow.getCells(LINK_COLUMN_FAMILY, CREATION_DATE_COLUMN);
             if (!dateCell.isEmpty()) {
-
-                // In getUserLinks method
-            String creationDate = dateCell.get(0).getValue().toStringUtf8();
-            linkData.put(getCreationDateKey(), creationDate);  // Use the getter method's key
-
-            } else {
-                System.out.println("No creation date found for: " + shortUrl);
+                String creationDate = dateCell.get(0).getValue().toStringUtf8();
+                linkData.put(getCreationDateKey(), creationDate);
             }
     
-            // Get status
+            // Get status (active)
             List<RowCell> statusCell = fullRow.getCells(LINK_COLUMN_FAMILY, STATUS_COLUMN);
+            String status = "true"; // default to true if not found
             if (!statusCell.isEmpty()) {
-                String status = statusCell.get(0).getValue().toStringUtf8();
-                linkData.put("active", status);
+                status = statusCell.get(0).getValue().toStringUtf8();
             }
+            linkData.put(getStatusKey(), status);
     
-            // Get analytics data
-            String today = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE);
-            Row analyticsRow = getAnalytics(shortUrl, today);
-            if (analyticsRow != null) {
-                List<String> cells = analyticsRow.getCells("metrics", "total_clicks")
-                    .stream()
-                    .map(cell -> cell.getValue().toStringUtf8())
-                    .toList();
-                if (!cells.isEmpty()) {
-                    linkData.put("totalClicks", cells.get(0));
+            // Calculate total clicks using the same logic as /analysis endpoint
+            String startDate = "19000101";
+            String endDate = "20500101";
+    
+            // Create query with filter for latest version only
+            Query analyticsQuery = Query.create(ANALYTICS_TABLE_ID)
+                .range(shortUrl + "#" + startDate, shortUrl + "#" + endDate)
+                .filter(Filters.FILTERS.limit().cellsPerColumn(1));
+            
+            long totalClicks = 0;
+            
+            for (Row analyticsRow : dataClient.readRows(analyticsQuery)) {
+                List<RowCell> clickCells = analyticsRow.getCells(METRICS_COLUMN_FAMILY, "total_clicks");
+                if (!clickCells.isEmpty()) {
+                    totalClicks += Long.parseLong(clickCells.get(0).getValue().toStringUtf8());
                 }
             }
             
+            linkData.put("totalClicks", String.valueOf(totalClicks));
             links.add(linkData);
         }
         
         return links;
     }
-
 
     public String createCustomUrl(String userId, String longUrl, String customName, String creationDate) throws IOException {
         // Validate custom name length
@@ -319,6 +312,26 @@ public class UrlShortener {
         dataClient.mutateRow(rowMutation);
         return customName;
     }
+
+    public void deleteAnalytics(String shortUrl) throws IOException {
+        // Query all analytics rows for this shortUrl
+        String startKey = shortUrl + "#";
+        String endKey = shortUrl + "#z"; // This will cover all possible dates
+        
+        Query query = Query.create(ANALYTICS_TABLE_ID)
+            .range(startKey, endKey);
+        
+        // Delete each analytics row found
+        dataClient.readRows(query).forEach(row -> {
+            try {
+                String rowKey = row.getKey().toStringUtf8();
+                deleteRow(ANALYTICS_TABLE_ID, rowKey);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to delete analytics row", e);
+            }
+        });
+    }
+
 public  static String getLongUrlKey() {
     return LONG_URL_COLUMN;
 }

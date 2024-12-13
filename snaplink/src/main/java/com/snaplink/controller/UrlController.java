@@ -73,7 +73,7 @@ public class UrlController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
         String formattedDate = currentDate.format(formatter);
 
-        urlShortener.updateAnalytics(shortUrl, formattedDate, ipPraser.resolveGeolocation(ipAddress));
+        urlShortener.updateAnalytics(shortUrl, formattedDate, "US");
         return new RedirectView(urlShortener.getOriginalUrl(shortUrl));
     }
     @GetMapping("/{shortUrl}")
@@ -213,7 +213,25 @@ public ResponseEntity<?> createCustomShortUrl(
                 .status(HttpStatus.NOT_FOUND)
                 .body(Collections.singletonMap("error", "Short URL not found"));
         }
+    }
+    @DeleteMapping("/links/{shortUrl}")
+        public ResponseEntity<?> deleteLink(
+            @PathVariable String shortUrl,
+            @RequestParam String userId) {
+        try {
+            urlService.deleteLink(shortUrl, userId);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Failed to delete the link");
+        }
 }
+
 }
 
 

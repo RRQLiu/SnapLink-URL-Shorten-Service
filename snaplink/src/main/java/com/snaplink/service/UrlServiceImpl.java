@@ -170,30 +170,30 @@ public class UrlServiceImpl implements UrlService {
 
     @Override
     public UserLinksResponse getUserLinks(String userId) {
-    try {
-        List<Map<String, String>> linksData = urlShortener.getUserLinks(userId);
-        
-        List<UserLinksResponse.UserLinkInfo> linkInfos = linksData.stream()
-            .map(
-                
-                data -> new UserLinksResponse.UserLinkInfo(
-                data.get("shortUrl"),
-                data.get(UrlShortener.getLongUrlKey()),
-                data.get(UrlShortener.getCreationDateKey()),
-                Long.parseLong(data.getOrDefault("totalClicks", "0")),
-                Boolean.parseBoolean(data.getOrDefault(UrlShortener.getStatusKey(), "true"))
-            ))
-            .collect(Collectors.toList());
-
-        UserLinksResponse response = new UserLinksResponse();
-        response.setUserId(userId);
-        response.setLinks(linkInfos);
-        response.setTotalLinks(linkInfos.size());
-        return response;
-    } catch (IOException e) {
-        throw new RuntimeException("Failed to fetch user links", e);
+        try {
+            List<Map<String, String>> linksData = urlShortener.getUserLinks(userId);
+            
+            List<UserLinksResponse.UserLinkInfo> linkInfos = linksData.stream()
+                .map(data -> new UserLinksResponse.UserLinkInfo(
+                    data.get("shortUrl"),
+                    data.get(UrlShortener.getLongUrlKey()),
+                    data.get(UrlShortener.getCreationDateKey()),
+                    Long.parseLong(data.getOrDefault("totalClicks", "0")),
+                    Boolean.parseBoolean(data.getOrDefault(UrlShortener.getStatusKey(), "true"))
+                ))
+                .collect(Collectors.toList());
+    
+            UserLinksResponse response = new UserLinksResponse();
+            response.setUserId(userId);
+            response.setLinks(linkInfos);
+            response.setTotalLinks(linkInfos.size());
+            
+            return response;
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to fetch user links", e);
+        }
     }
-}
+    
 
 @Override
 public String createCustomShortUrl(String userId, String longUrl, String customName, 
@@ -230,4 +230,26 @@ public String createCustomShortUrl(String userId, String longUrl, String customN
         }
     }
 
+    public void deleteLink(String shortUrl, String userId) {
+
+        try{
+             // First, verify that the link belongs to the user
+            List<Map<String, String>> userLinks = urlShortener.getUserLinks(userId);
+        boolean isOwner = userLinks.stream()
+            .anyMatch(link -> link.get("shortUrl").equals(shortUrl));
+        
+        if (!isOwner) {
+            throw new IllegalArgumentException("You don't have permission to delete this link");
+        }
+        
+        // Delete from link table
+        urlShortener.deleteLink(shortUrl);
+        
+        // Delete all analytics data for this link
+        urlShortener.deleteAnalytics(shortUrl);
+    } catch (IOException e) {
+        throw new RuntimeException("Failed to delete link", e);
+        }
+       
+    }
 }
