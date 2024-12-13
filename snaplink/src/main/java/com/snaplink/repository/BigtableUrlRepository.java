@@ -75,7 +75,7 @@ public class BigtableUrlRepository implements UrlRepository {
     @Override
     public void saveUser(String userId, String name, String email) {
         try {
-            urlShortener.addUser(userId, name, email, LocalDate.now().toString());
+            urlShortener.addUser(userId, name, email, LocalDate.now().toString(), "123", "123");
         } catch (IOException e) {
             throw new RuntimeException("Failed to save user", e);
         }
