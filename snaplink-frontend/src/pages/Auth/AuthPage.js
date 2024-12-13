@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { authService } from '../../services/authService';
 
 const AuthPage = ({ onLogin }) => {
   const location = useLocation();
@@ -26,17 +27,18 @@ const AuthPage = ({ onLogin }) => {
 
     try {
       if (mode === 'login') {
-        // Mock successful login
-        const success = onLogin(email, password);
+        const success = await onLogin(email, password);
         if (success) {
-          localStorage.setItem("userID", email);
-          navigate('/main');}
+          navigate('/main');
+        } else {
+          setError(t('auth.invalidCredentials'));
+        }
       } else {
-        // Mock registration
-        // In real implementation, this would call the API
-        onLogin(email, password);
-        localStorage.setItem("userID", email);
-        navigate('/main');
+        await authService.register(email, password);
+        const success = await onLogin(email, password);
+        if (success) {
+          navigate('/main');
+        }
       }
     } catch (err) {
       setError(t('auth.error'));

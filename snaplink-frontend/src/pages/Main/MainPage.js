@@ -44,10 +44,21 @@ const MainPage = () => {
     }
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/shorten`, {
-        userId,
-        longUrl: originalUrl,
-      });
+      let response;
+      if (customName.trim()) {
+        // Use custom-shorten endpoint when custom name is provided
+        response = await axios.post(`${API_BASE_URL}/custom-shorten`, {
+          userId,
+          longUrl: originalUrl,
+          customName: customName.trim()
+        });
+      } else {
+        // Use original shorten endpoint when no custom name
+        response = await axios.post(`${API_BASE_URL}/shorten`, {
+          userId,
+          longUrl: originalUrl,
+        });
+      }
       setShortUrl(response.data.shortUrl);
     } catch (err) {
       setError(err.response?.data?.message || t("main.generalError"));
@@ -63,9 +74,9 @@ const MainPage = () => {
 
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/api/url/${retrieveUrl}`
+        `${API_BASE_URL}/retrieve/${retrieveUrl}`
       );
-      setRetrievedOriginalUrl(response.headers.location);
+      setRetrievedOriginalUrl(response.data.longUrl);
     } catch (err) {
       setError(err.response?.data?.message || t("main.generalError"));
     }
@@ -93,7 +104,7 @@ const MainPage = () => {
 
     // bulk operation
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/bulk-shorten`, {
+      const response = await axios.post(`${API_BASE_URL}/bulk-shorten`, {
         userId,
         longUrls: urlList,
       });
@@ -146,11 +157,11 @@ const MainPage = () => {
               <Typography variant="subtitle1">{t("main.result")}:</Typography>
               <Typography>
                 <a
-                  href={`${API_BASE_URL}/api/url/${shortUrl}`}
+                  href={`${API_BASE_URL}/url/${shortUrl}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {`${API_BASE_URL}/api/url/${shortUrl}`}
+                  {`${API_BASE_URL}/url/${shortUrl}`}
                 </a>
               </Typography>
             </Box>
@@ -181,7 +192,15 @@ const MainPage = () => {
               <Typography variant="subtitle1">
                 {t("main.originalUrl")}:
               </Typography>
-              <Typography>{retrievedOriginalUrl}</Typography>
+              <Typography>
+                <a 
+                  href={retrievedOriginalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {retrievedOriginalUrl}
+                </a>
+              </Typography>
             </Box>
           )}
         </Paper>
@@ -229,11 +248,11 @@ const MainPage = () => {
                     {mapping.longUrl} → {
                       mapping.status === "SUCCESS" ? (
                         <a 
-                          href={`${API_BASE_URL}/api/url/${mapping.shortUrl}`}
+                          href={`${API_BASE_URL}/url/${mapping.shortUrl}`}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          {`${API_BASE_URL}/api/url/${mapping.shortUrl}`}
+                          {`${API_BASE_URL}/url/${mapping.shortUrl}`}
                         </a>
                       ) : mapping.error
                     }

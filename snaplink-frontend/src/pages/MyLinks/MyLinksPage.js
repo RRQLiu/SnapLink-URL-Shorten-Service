@@ -34,7 +34,7 @@ const MyLinksPage = () => {
           return;
         }
 
-        const response = await axios.get(`${API_BASE_URL}/api/users/${userId}/links`);
+        const response = await axios.get(`${API_BASE_URL}/users/${userId}/links`);
         setLinks(response.data.links.map(link => ({
           id: link.shortUrl, // Using shortUrl as id since it's unique
           originalUrl: link.longUrl,
@@ -59,23 +59,41 @@ const MyLinksPage = () => {
         </Typography>
 
         <TableContainer component={Paper}>
-          <Table>
+          <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>{t('myLinks.originalUrl')}</TableCell>
-                <TableCell>{t('myLinks.shortUrl')}</TableCell>
-                <TableCell>{t('myLinks.createdAt')}</TableCell>
-                <TableCell>{t('myLinks.clicks')}</TableCell>
-                <TableCell>{t('myLinks.actions')}</TableCell>
+                <TableCell sx={{ width: '30%', whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                  {t('myLinks.originalUrl')}
+                </TableCell>
+                <TableCell sx={{ width: '25%', whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                  {t('myLinks.shortUrl')}
+                </TableCell>
+                <TableCell sx={{ width: '15%', whiteSpace: 'normal' }}>
+                  {t('myLinks.createdAt')}
+                </TableCell>
+                <TableCell sx={{ width: '10%' }}>
+                  {t('myLinks.clicks')}
+                </TableCell>
+                <TableCell sx={{ width: '10%' }}>
+                  {t('myLinks.actions')}
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {links.map((link) => (
                 <TableRow key={link.id}>
-                  <TableCell>{link.originalUrl}</TableCell>
-                  <TableCell>{link.shortUrl}</TableCell>
-                  <TableCell>{link.createdAt}</TableCell>
-                  <TableCell>{link.clicks}</TableCell>
+                  <TableCell sx={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                    {link.originalUrl}
+                  </TableCell>
+                  <TableCell sx={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                    {link.shortUrl}
+                  </TableCell>
+                  <TableCell sx={{ whiteSpace: 'normal' }}>
+                    {link.createdAt}
+                  </TableCell>
+                  <TableCell>
+                    {link.clicks}
+                  </TableCell>
                   <TableCell>
                     <IconButton 
                       color="primary"

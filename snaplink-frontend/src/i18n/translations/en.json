@@ -20,7 +20,12 @@
     "registerButton": "Register",
     "switchToRegister": "Don't have an account? Register",
     "switchToLogin": "Already have an account? Login",
-    "error": "Authentication failed"
+    "error": "Authentication failed",
+    "logout": "Logout",
+    "invalidEmail": "Invalid email address",
+    "invalidPassword": "Invalid password",
+    "invalidUsername": "Invalid username",
+    "invalidCredentials": "Invalid credentials"
   },
   "main": {
     "title": "URL Shortener",
@@ -28,7 +33,7 @@
     "retrieveSection": "Retrieve Original URL",
     "originalUrl": "Original URL",
     "customName": "Custom Name (Optional)",
-    "customNameHelper": "Leave empty for random name",
+    "customNameHelper": "Leave empty for random name. Custom name must be less than 7 characters",
     "generate": "Generate",
     "retrieve": "Retrieve",
     "result": "Short URL",

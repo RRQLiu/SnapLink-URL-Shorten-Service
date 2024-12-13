@@ -20,7 +20,12 @@
     "registerButton": "Registrarse",
     "switchToRegister": "¿No tienes cuenta? Regístrate",
     "switchToLogin": "¿Ya tienes cuenta? Inicia sesión",
-    "error": "Error de autenticación"
+    "error": "Error de autenticación",
+    "logout": "Cerrar Sesión",
+    "invalidEmail": "Correo electrónico inválido",
+    "invalidPassword": "La contraseña debe tener al menos 8 caracteres",
+    "invalidUsername": "El nombre de usuario debe ser menos de 7 caracteres",
+    "invalidCredentials": "Credenciales inválidas"
   },
   "main": {
     "title": "Acortador de URLs",
@@ -28,7 +33,7 @@
     "retrieveSection": "Recuperar URL Original",
     "originalUrl": "URL Original",
     "customName": "Nombre Personalizado (Opcional)",
-    "customNameHelper": "Dejar en blanco para nombre aleatorio",
+    "customNameHelper": "Dejar en blanco para nombre aleatorio. El nombre personalizado debe ser menos de 7 caracteres",
     "generate": "Generar",
     "retrieve": "Recuperar",
     "result": "URL Corta",

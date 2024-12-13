@@ -20,7 +20,12 @@
     "registerButton": "注册",
     "switchToRegister": "没有账号？立即注册",
     "switchToLogin": "已有账号？立即登录",
-    "error": "认证失败"
+    "error": "认证失败",
+    "logout": "退出登录",
+    "invalidEmail": "电子邮箱格式错误",
+    "invalidPassword": "密码必须至少8个字符",
+    "invalidUsername": "用户名必须小于7个字符",
+    "invalidCredentials": "用户名或密码错误"
   },
   "main": {
     "title": "网址缩短器",
@@ -28,7 +33,7 @@
     "retrieveSection": "获取原始链接",
     "originalUrl": "原始网址",
     "customName": "自定义名称（可选）",
-    "customNameHelper": "留空则随机生成",
+    "customNameHelper": "留空则随机生成. 自定义名称必须小于7个字符",
     "generate": "生成",
     "retrieve": "获取",
     "result": "短链接",

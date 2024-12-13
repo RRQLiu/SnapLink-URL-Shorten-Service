@@ -13,23 +13,31 @@ import LanguageSelector from "./components/LanguageSelector/LanguageSelector";
 
 import { I18nextProvider } from "react-i18next";
 import i18n from "./i18n/config";
+import { authService } from './services/authService';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+  const [isAuthenticated, setIsAuthenticated] = React.useState(
+    !!localStorage.getItem('token')
+  );
 
-  // Mock authentication for testing
-  const login = (email, password) => {
-    // In real implementation, this would make an API call
-    setIsAuthenticated(true);
-    localStorage.setItem("mockToken", "test-token-123");
-    localStorage.setItem("userID", "123@123.com");
-    return true;
+  const login = async (email, password) => {
+    try {
+      await authService.login(email, password);
+      setIsAuthenticated(true);
+      return true;
+    } catch (error) {
+      console.error('Login failed:', error);
+      return false;
+    }
   };
 
-  const logout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem("mockToken");
-    localStorage.removeItem("userID");
+  const logout = async () => {
+    try {
+      await authService.logout();
+      setIsAuthenticated(false);
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   return (

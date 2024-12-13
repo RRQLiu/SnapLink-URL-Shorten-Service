@@ -30,15 +30,11 @@ const AnalyticsPage = () => {
         }
 
         // Get analytics data
-        const response = await axios.get(`${API_BASE_URL}/api/analytics/${id}`);
 
-        // Get detailed metrics
-        // const metricsResponse = await axios.post(`${API_BASE_URL}/api/analysis`, {
-        //   shortUrl: id,
-        //   // You can add startDate and endDate here if needed
-        // });
+        const response = await axios.post(`${API_BASE_URL}/analysis`, {
+          shortUrl: id,
+        });
 
-        // Combine both responses into a single analytics object
         setAnalytics({
           totalClicks: response.data.totalClicks,
           uniqueVisitors: response.data.totalClicks, // If unique visitors isn't provided separately
