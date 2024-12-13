@@ -18,25 +18,21 @@ const AboutPage = () => {
       name: "Feifei Li",
       role: "Frontend Developer",
       image: "https://imgur.com/CxdR4Xv.jpg",
-      description: t("lalalala"),
     },
     {
       name: "Ruiqi Liu",
       role: "Backend Developer",
       image: "https://imgur.com/ZCmk4st.jpg",
-      description: t("lalalala"),
     },
     {
       name: "Ray Zhang",
       role: "Backend Developer",
       image: "https://imgur.com/uQImhWk.jpg",
-      description: t("lalalala"),
     },
     {
       name: "Yutong Feng",
       role: "Backend Developer",
       image: "https://imgur.com/3Y9ybQG.jpg",
-      description: t("lalalala"),
     },
   ];
 

@@ -36,9 +36,16 @@
     "retrieveUrlRequired": "Please enter a short URL",
     "bulkSection": "Bulk Operation",
     "bulkUrls": "Enter URLs (one per line)",
-    "bulkResult": "Short URLs",
+    "bulkResults": "Short URLs",
     "bulkUrlsHelper": "Enter URLs (one per line)",
-    "shortUrl": "Short URL"
+    "shortUrl": "Short URL",
+    "bulkOperation": "Bulk Operation",
+    "bulkUrlsRequired": "Please enter at least one URL",
+    "tooManyUrls": "You can only generate up to 10 short URLs at a time",
+    "loginRequired": "Please login to use this feature",
+    "generalError": "An error occurred",
+    "bulkOperationSuccess": "Bulk operation completed successfully",
+    "bulkOperationError": "Bulk operation failed"
   },
   "about": {
     "title": "About Us",
@@ -49,5 +56,22 @@
     "member2Description": "Backend developer, focused on system architecture.",
     "member3Description": "UI/UX designer, dedicated to improving user experience.",
     "member4Description": "Project manager, with extensive software development experience."
+  },
+  "myLinks": {
+    "title": "My Links",
+    "originalUrl": "Original URL",
+    "shortUrl": "Short URL",
+    "createdAt": "Created At",
+    "clicks": "Clicks",
+    "actions": "Actions"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "totalClicks": "Total Clicks",
+    "uniqueVisitors": "Unique Visitors",
+    "topCountries": "Top Countries",
+    "browsers": "Browsers",
+    "clicks": "Clicks",
+    "users": "Users"
   }
 }

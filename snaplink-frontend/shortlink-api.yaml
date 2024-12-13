@@ -9,21 +9,73 @@ servers:
   - description: SwaggerHub API Auto Mocking
     url: https://virtserver.swaggerhub.com/FEILI043_1/shortlink/1.0.0
   - description: Local Development
-    url: '/api'
+    url: "/api"
   - description: Production
-    url: 'https://example.com/api'
+    url: "https://example.com/api"
 
 tags:
   - name: Auth
     description: User authentication endpoints.
   - name: Shortlinks
-    description: 'Endpoints for creating, retrieving, and managing shortlinks.'
+    description: "Endpoints for creating, retrieving, and managing shortlinks."
   - name: Analysis
     description: Endpoints for retrieving analytics data of shortlinks.
 
 components:
   schemas:
-    # Existing schemas
+    CustomShortenUrlRequest:
+      type: object
+      required:
+        - userId
+        - longUrl
+        - customName
+      properties:
+        userId:
+          type: string
+          description: ID of the user creating the custom short URL
+        longUrl:
+          type: string
+          description: Original URL to be shortened
+          format: uri
+        customName:
+          type: string
+          description: Custom name for the short URL (max 7 alphanumeric characters)
+          maxLength: 7
+          pattern: "^[a-zA-Z0-9]*$"
+          example: "myurl"
+
+    UserLinksResponse:
+      type: object
+      properties:
+        userId:
+          type: string
+          description: ID of the user whose links are being retrieved
+        links:
+          type: array
+          items:
+            type: object
+            properties:
+              shortUrl:
+                type: string
+                description: The shortened URL identifier
+              longUrl:
+                type: string
+                description: The original URL
+                format: uri
+              creationDate:
+                type: string
+                description: Date when the URL was created
+                format: date
+              totalClicks:
+                type: integer
+                description: Total number of clicks on this URL
+              active:
+                type: boolean
+                description: Whether the URL is currently active
+        totalLinks:
+          type: integer
+          description: Total number of links owned by the user
+
     ShortenUrlRequest:
       type: object
       required:
@@ -199,18 +251,18 @@ components:
       bearerFormat: JWT
 
 paths:
-  /shorten:
+  /custom-shorten:
     post:
       tags:
         - Shortlinks
-      summary: Create a short URL
-      operationId: shortenUrl
+      summary: Create a custom short URL
+      operationId: createCustomShortUrl
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ShortenUrlRequest'
+              $ref: "#/components/schemas/CustomShortenUrlRequest"
       parameters:
         - in: header
           name: X-Forwarded-For
@@ -225,24 +277,106 @@ paths:
           required: false
           description: User agent of the client
       responses:
-        '200':
-          description: URL successfully shortened
+        "200":
+          description: URL successfully shortened with custom name
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ShortenUrlResponse'
-        '400':
-          description: Invalid input
+                $ref: "#/components/schemas/ShortenUrlResponse"
+        "400":
+          description: Invalid input or custom name already taken
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
-        '401':
+                type: string
+                example: "Custom name cannot be empty"
+        "401":
           description: Unauthorized
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                type: string
+                example: "Unauthorized access"
+
+  /users/{userId}/links:
+    get:
+      tags:
+        - Shortlinks
+      summary: Get all shortened URLs for a specific user
+      operationId: getUserLinks
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          description: ID of the user whose links to retrieve
+      responses:
+        "200":
+          description: Successfully retrieved user's links
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserLinksResponse"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - bearerAuth: []
+
+  /shorten:
+    post:
+      tags:
+        - Shortlinks
+      summary: Create a short URL
+      operationId: shortenUrl
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShortenUrlRequest"
+      parameters:
+        - in: header
+          name: X-Forwarded-For
+          schema:
+            type: string
+          required: false
+          description: IP address of the client
+        - in: header
+          name: User-Agent
+          schema:
+            type: string
+          required: false
+          description: User agent of the client
+      responses:
+        "200":
+          description: URL successfully shortened
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShortenUrlResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
   /url/{shortUrl}:
     get:
@@ -264,7 +398,7 @@ paths:
           required: false
           description: IP address of the client
       responses:
-        '302':
+        "302":
           description: Redirect to original URL
           headers:
             Location:
@@ -272,12 +406,12 @@ paths:
                 type: string
                 format: uri
               description: Original URL
-        '404':
+        "404":
           description: Short URL not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
 
   /{shortUrl}:
     get:
@@ -305,7 +439,7 @@ paths:
           required: false
           description: User agent of the client
       responses:
-        '302':
+        "302":
           description: Redirect to original URL
           headers:
             Location:
@@ -313,12 +447,12 @@ paths:
                 type: string
                 format: uri
               description: Original URL
-        '404':
+        "404":
           description: Short URL not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
 
   /analytics/{shortUrl}:
     get:
@@ -348,18 +482,18 @@ paths:
             format: date
           description: End date for analytics (defaults to current date)
       responses:
-        '200':
+        "200":
           description: Analytics data retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UrlAnalyticsResponse'
-        '404':
+                $ref: "#/components/schemas/UrlAnalyticsResponse"
+        "404":
           description: Short URL not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
 
   /bulk-shorten:
     post:
@@ -372,7 +506,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/BulkShortenUrlRequest'
+              $ref: "#/components/schemas/BulkShortenUrlRequest"
       parameters:
         - in: header
           name: X-Forwarded-For
@@ -387,24 +521,24 @@ paths:
           required: false
           description: User agent of the client
       responses:
-        '200':
+        "200":
           description: URLs successfully shortened
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BulkShortenUrlResponse'
-        '400':
+                $ref: "#/components/schemas/BulkShortenUrlResponse"
+        "400":
           description: Invalid input or too many URLs
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
-        '401':
+                $ref: "#/components/schemas/Error"
+        "401":
           description: Unauthorized
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
 
   /analysis:
     post:
@@ -433,36 +567,36 @@ paths:
                   description: End date in format YYYYMMDD (defaults to 20500101)
                   pattern: '^\d{8}$'
       responses:
-        '200':
+        "200":
           description: Analysis metrics retrieved successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LinkMetricsResponse'
-        '400':
+                $ref: "#/components/schemas/LinkMetricsResponse"
+        "400":
           description: Invalid input
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
-        '404':
+                $ref: "#/components/schemas/Error"
+        "404":
           description: Short URL not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/Error"
 
   # Newly added Auth paths
   /auth/register:
     post:
       tags:
-      - Auth
+        - Auth
       summary: Register a new user
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RegisterRequest'
+              $ref: "#/components/schemas/RegisterRequest"
         required: true
       responses:
         "201":
@@ -470,24 +604,24 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthResponse'
+                $ref: "#/components/schemas/AuthResponse"
         "400":
           description: "Bad request (e.g., email already taken)"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
 
   /auth/login:
     post:
       tags:
-      - Auth
+        - Auth
       summary: Login an existing user
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LoginRequest'
+              $ref: "#/components/schemas/LoginRequest"
         required: true
       responses:
         "200":
@@ -495,18 +629,18 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuthResponse'
+                $ref: "#/components/schemas/AuthResponse"
         "401":
           description: Invalid credentials
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
 
   /auth/logout:
     post:
       tags:
-      - Auth
+        - Auth
       summary: Logout the current user
       responses:
         "204":
@@ -516,6 +650,6 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
       security:
-      - bearerAuth: []
+        - bearerAuth: []

@@ -1,102 +1,105 @@
-import React, { useState } from 'react';
-import { 
-  Container, 
-  Paper, 
-  TextField, 
-  Button, 
-  Typography, 
+import React, { useState } from "react";
+import {
+  Container,
+  Paper,
+  TextField,
+  Button,
+  Typography,
   Box,
   Divider,
-  Alert 
-} from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import axios from 'axios';
-import { API_BASE_URL } from '../../config/api.js';
+  Alert,
+} from "@mui/material";
+import { useTranslation } from "react-i18next";
+import axios from "axios";
+import { API_BASE_URL } from "../../config/api.js";
 
 const MainPage = () => {
   const { t } = useTranslation();
-  const [originalUrl, setOriginalUrl] = useState('');
-  const [customName, setCustomName] = useState('');
-  const [shortUrl, setShortUrl] = useState('');
-  const [retrieveUrl, setRetrieveUrl] = useState('');
-  const [retrievedOriginalUrl, setRetrievedOriginalUrl] = useState('');
-  const [error, setError] = useState('');
-  const [bulkUrls, setBulkUrls] = useState('');
+  const [originalUrl, setOriginalUrl] = useState("");
+  const [customName, setCustomName] = useState("");
+  const [shortUrl, setShortUrl] = useState("");
+  const [retrieveUrl, setRetrieveUrl] = useState("");
+  const [retrievedOriginalUrl, setRetrievedOriginalUrl] = useState("");
+  const [error, setError] = useState("");
+  const [bulkUrls, setBulkUrls] = useState("");
   const [bulkResults, setBulkResults] = useState(null);
 
   const getUserId = () => {
-    console.log(localStorage.getItem('userID'));
-    return localStorage.getItem('userID') || '';
+    console.log(localStorage.getItem("userID"));
+    return localStorage.getItem("userID") || "";
   };
 
   const handleGenerate = async () => {
-    setError('');
+    setError("");
     const userId = getUserId();
-    
+
     if (!userId) {
-      setError(t('main.loginRequired'));
+      setError(t("main.loginRequired"));
       return;
     }
-    
+
     if (!originalUrl) {
-      setError(t('main.urlRequired'));
+      setError(t("main.urlRequired"));
       return;
     }
-    
+
     try {
       const response = await axios.post(`${API_BASE_URL}/api/shorten`, {
         userId,
-        longUrl: originalUrl
+        longUrl: originalUrl,
       });
       setShortUrl(response.data.shortUrl);
     } catch (err) {
-      setError(err.response?.data?.message || t('main.generalError'));
+      setError(err.response?.data?.message || t("main.generalError"));
     }
   };
 
   const handleRetrieve = async () => {
-    setError('');
+    setError("");
     if (!retrieveUrl) {
-      setError(t('main.retrieveUrlRequired'));
+      setError(t("main.retrieveUrlRequired"));
       return;
     }
 
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/url/${retrieveUrl}`);
+      const response = await axios.get(
+        `${API_BASE_URL}/api/url/${retrieveUrl}`
+      );
       setRetrievedOriginalUrl(response.headers.location);
     } catch (err) {
-      setError(err.response?.data?.message || t('main.generalError'));
+      setError(err.response?.data?.message || t("main.generalError"));
     }
   };
 
   const handleBulkGenerate = async () => {
-    setError('');
+    setError("");
     const userId = getUserId();
-    
+
     if (!userId) {
-      setError(t('main.loginRequired'));
+      setError(t("main.loginRequired"));
       return;
     }
-    
+
     if (!bulkUrls) {
-      setError(t('main.bulkUrlsRequired'));
+      setError(t("main.bulkUrlsRequired"));
       return;
     }
 
-    const urlList = bulkUrls.split('\n').filter(url => url.trim());
+    const urlList = bulkUrls.split("\n").filter((url) => url.trim());
     if (urlList.length > 10) {
-      setError(t('main.tooManyUrls'));
+      setError(t("main.tooManyUrls"));
       return;
     }
 
+    // bulk operation
     try {
       const response = await axios.post(`${API_BASE_URL}/api/bulk-shorten`, {
         userId,
-        longUrls: urlList
+        longUrls: urlList,
       });
       setBulkResults(response.data);
     } catch (err) {
-      setError(err.response?.data?.message || t('main.generalError'));
+      setError(err.response?.data?.message || t("main.generalError"));
     }
   };
 
@@ -104,44 +107,52 @@ const MainPage = () => {
     <Container maxWidth="md">
       <Box sx={{ mt: 4, mb: 6 }}>
         <Typography variant="h4" gutterBottom>
-          {t('main.title')}
+          {t("main.title")}
         </Typography>
 
         {/* URL Shortening Section */}
         <Paper sx={{ p: 3, mb: 4 }}>
           <Typography variant="h6" gutterBottom>
-            {t('main.createSection')}
+            {t("main.createSection")}
           </Typography>
-          
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-          
+
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+
           <TextField
             fullWidth
-            label={t('main.originalUrl')}
+            label={t("main.originalUrl")}
             value={originalUrl}
             onChange={(e) => setOriginalUrl(e.target.value)}
             margin="normal"
           />
           <TextField
             fullWidth
-            label={t('main.customName')}
+            label={t("main.customName")}
             value={customName}
             onChange={(e) => setCustomName(e.target.value)}
             margin="normal"
-            helperText={t('main.customNameHelper')}
+            helperText={t("main.customNameHelper")}
           />
-          <Button
-            variant="contained"
-            onClick={handleGenerate}
-            sx={{ mt: 2 }}
-          >
-            {t('main.generate')}
+          <Button variant="contained" onClick={handleGenerate} sx={{ mt: 2 }}>
+            {t("main.generate")}
           </Button>
-          
+
           {shortUrl && (
             <Box sx={{ mt: 2 }}>
-              <Typography variant="subtitle1">{t('main.result')}:</Typography>
-              <Typography>{shortUrl}</Typography>
+              <Typography variant="subtitle1">{t("main.result")}:</Typography>
+              <Typography>
+                <a
+                  href={`${API_BASE_URL}/api/url/${shortUrl}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {`${API_BASE_URL}/api/url/${shortUrl}`}
+                </a>
+              </Typography>
             </Box>
           )}
         </Paper>
@@ -151,27 +162,25 @@ const MainPage = () => {
         {/* URL Retrieval Section */}
         <Paper sx={{ p: 3 }}>
           <Typography variant="h6" gutterBottom>
-            {t('main.retrieveSection')}
+            {t("main.retrieveSection")}
           </Typography>
-          
+
           <TextField
             fullWidth
-            label={t('main.shortUrl')}
+            label={t("main.shortUrl")}
             value={retrieveUrl}
             onChange={(e) => setRetrieveUrl(e.target.value)}
             margin="normal"
           />
-          <Button
-            variant="contained"
-            onClick={handleRetrieve}
-            sx={{ mt: 2 }}
-          >
-            {t('main.retrieve')}
+          <Button variant="contained" onClick={handleRetrieve} sx={{ mt: 2 }}>
+            {t("main.retrieve")}
           </Button>
-          
+
           {retrievedOriginalUrl && (
             <Box sx={{ mt: 2 }}>
-              <Typography variant="subtitle1">{t('main.originalUrl')}:</Typography>
+              <Typography variant="subtitle1">
+                {t("main.originalUrl")}:
+              </Typography>
               <Typography>{retrievedOriginalUrl}</Typography>
             </Box>
           )}
@@ -182,34 +191,52 @@ const MainPage = () => {
         {/* Add Bulk Operation Section */}
         <Paper sx={{ p: 3, mb: 4 }}>
           <Typography variant="h6" gutterBottom>
-            {t('main.bulkSection')}
+            {t("main.bulkSection")}
           </Typography>
-          
+
           <TextField
             fullWidth
             multiline
             rows={4}
-            label={t('main.bulkUrls')}
+            label={t("main.bulkUrls")}
             value={bulkUrls}
             onChange={(e) => setBulkUrls(e.target.value)}
             margin="normal"
-            helperText={t('main.bulkUrlsHelper')}
+            helperText={t("main.bulkUrlsHelper")}
           />
           <Button
             variant="contained"
             onClick={handleBulkGenerate}
             sx={{ mt: 2 }}
           >
-            {t('main.generateBulk')}
+            {t("main.generate")}
           </Button>
-          
           {bulkResults && (
             <Box sx={{ mt: 2 }}>
-              <Typography variant="subtitle1">{t('main.bulkResults')}:</Typography>
+              <Typography variant="subtitle1">
+                {t("main.bulkResults")}:
+              </Typography>
               {bulkResults.urlMappings.map((mapping, index) => (
                 <Box key={index} sx={{ mt: 1 }}>
-                  <Typography variant="body2" color={mapping.status === 'SUCCESS' ? 'success.main' : 'error.main'}>
-                    {mapping.longUrl} → {mapping.shortUrl || mapping.error}
+                  <Typography
+                    variant="body2"
+                    color={
+                      mapping.status === "SUCCESS"
+                        ? "success.main"
+                        : "error.main"
+                    }
+                  >
+                    {mapping.longUrl} → {
+                      mapping.status === "SUCCESS" ? (
+                        <a 
+                          href={`${API_BASE_URL}/api/url/${mapping.shortUrl}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {`${API_BASE_URL}/api/url/${mapping.shortUrl}`}
+                        </a>
+                      ) : mapping.error
+                    }
                   </Typography>
                 </Box>
               ))}
@@ -221,4 +248,4 @@ const MainPage = () => {
   );
 };
 
-export default MainPage; 
+export default MainPage;
